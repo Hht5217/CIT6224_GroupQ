@@ -19,6 +19,10 @@ include 'includes/timeout.php';
         <?php include 'includes/navbar.php'; ?>
 
         <div class="container">
+            <?php if (!empty($_SESSION['login_success'])): ?>
+                <div class="alert alert-success">Login successful!</div>
+                <?php unset($_SESSION['login_success']); ?>
+            <?php endif; ?>
             <div class="welcome-section">
                 <h2>Welcome to MMU Talent Showcase</h2>
                 <p>Discover and showcase your talents with the MMU community.</p>

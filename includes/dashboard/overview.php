@@ -43,7 +43,10 @@ foreach ($orders as $order) {
 </div>
 
 <div class="dashboard-card">
-    <h2>Recent Orders</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Recent Orders</h2>
+        <a href="user-dashboard.php?page=orders" class="btn btn-primary">View Detail</a>
+    </div>
     <?php if (empty($orders)): ?>
         <p>No orders found.</p>
     <?php else: ?>
@@ -79,14 +82,20 @@ foreach ($orders as $order) {
 </div>
 
 <div class="dashboard-card">
-    <h2>Recent Products</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Recent Products</h2>
+        <a href="user-dashboard.php?page=products" class="btn btn-primary">View Detail</a>
+    </div>
     <?php if (empty($products)): ?>
         <p>No products found.</p>
     <?php else: ?>
         <div class="products-grid">
             <?php foreach (array_slice($products, 0, 4) as $product): ?>
                 <div class="product-card">
-                    <img src="<?php echo $product['image_url']; ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                    <div class="product-image">
+                        <img src="<?php echo $product['image_url']; ?>"
+                            alt="<?php echo htmlspecialchars($product['title']); ?>">
+                    </div>
                     <div class="product-info">
                         <h3><?php echo htmlspecialchars($product['title']); ?></h3>
                         <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
