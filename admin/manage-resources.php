@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/database.php';
+include '../includes/timeout.php';
 
 // 检查管理员登录状态
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {

@@ -1,9 +1,15 @@
 <?php
 // Get user's comments
-$sql = "SELECT c.*, u.username, u.full_name, p.profile_picture
+$sql = "SELECT c.*, 
+               u.username AS commenter_username, u.full_name AS commenter_full_name,
+               owner.username AS owner_username, owner.full_name AS owner_full_name,
+               p.profile_picture AS commenter_profile_picture,
+               owner_p.profile_picture AS owner_profile_picture
         FROM comments c 
         JOIN users u ON c.user_id = u.id 
         LEFT JOIN profiles p ON u.id = p.user_id
+        JOIN users owner ON c.commented_user_id = owner.id
+        LEFT JOIN profiles owner_p ON owner.id = owner_p.user_id
         WHERE c.user_id = ? 
         ORDER BY c.created_at DESC";
 $user_comments = [];
@@ -49,23 +55,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete-comment'])) {
                 <?php foreach ($user_comments as $comment): ?>
                     <div class="comment-card">
                         <div class="comment-header">
-                            <div class="user-info">
-                                <img src="<?php echo !empty($comment['profile_picture']) ? $comment['profile_picture'] : 'assets/images/default-avatar.png'; ?>"
-                                    alt="<?php echo htmlspecialchars($comment['username']); ?>" class="avatar">
+                            <div>
+                                <img src="<?php echo !empty($comment['owner_profile_picture']) ? $comment['owner_profile_picture'] : 'assets/images/default-avatar.png'; ?>"
+                                    alt="<?php echo htmlspecialchars($comment['owner_username']); ?>" class="avatar">
+                                <h3><?php echo htmlspecialchars($comment['owner_full_name']); ?></h3>
                                 <div>
-                                    <h4><?php echo htmlspecialchars($comment['full_name'] ?: $comment['username']); ?></h4>
+                                    <?php echo nl2br(htmlspecialchars($comment['comment'])); ?>
+                                    </br>
                                     <span
                                         class="timestamp"><?php echo date('M d, Y H:i', strtotime($comment['created_at'])); ?></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="comment-content">
-                            <?php echo nl2br(htmlspecialchars($comment['comment'])); ?>
-                        </div>
                         <div class="comment-actions">
-                            <button class="btn btn-secondary" onclick="deleteComment(<?php echo $comment['id']; ?>)">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
+                            <a class="btn"
+                                href="talent-details.php?id=<?php echo $comment['commented_user_id']; ?>#comments-section">
+                                Go to comment</a>
                         </div>
                     </div>
                 <?php endforeach; ?>

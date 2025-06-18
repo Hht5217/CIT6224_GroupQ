@@ -209,7 +209,7 @@
 }
 
 .user-info {
-    /* display: flex; */
+    display: flex;
     align-items: center;
     gap: 1rem;
 }
@@ -257,6 +257,15 @@
     padding: 1rem;
     background: #f8f9fa;
     border-radius: 4px;
+}
+
+.reply-form textarea {
+    width: 100%;
+    min-height: 50px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
 }
 
 .replies {

@@ -262,7 +262,7 @@ echo "<!-- Comments count: " . count($comments) . " -->";
                     <?php endif; ?>
 
                     <!-- Comments Section -->
-                    <div class="comments-section">
+                    <div class="comments-section" id="comments-section">
                         <h3>Comments (<?php echo count($comments); ?>)</h3>
 
                         <?php if (isset($_SESSION['user_id'])): ?>
@@ -298,7 +298,7 @@ echo "<!-- Comments count: " . count($comments) . " -->";
                                                         class="timestamp"><?php echo date('M d, Y H:i', strtotime($comment['created_at'])); ?></span>
                                                 </div>
                                             </div>
-                                            <?php if (isset($_SESSION['user_id']) && ($_SESSION['user_id'] == $comment['user_id'] || $_SESSION['user_id'] == $user_id)): ?>
+                                            <?php if (isset($_SESSION['user_id'])): ?>
                                                 <div class="comment-actions">
                                                     <button class="reply-btn"
                                                         onclick="showReplyForm(<?php echo $comment['id']; ?>)">
@@ -333,7 +333,7 @@ echo "<!-- Comments count: " . count($comments) . " -->";
                                                 </div>
                                                 <div class="form-actions">
                                                     <button type="submit" class="btn btn-primary">Post Reply</button>
-                                                    <button type="button" class="btn btn-secondary"
+                                                    <button type="button" class="btn btn-secondary cancel-reply-btn"
                                                         onclick="hideReplyForm(<?php echo $comment['id']; ?>)">Cancel</button>
                                                 </div>
                                             </form>
