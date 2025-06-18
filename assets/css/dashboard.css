@@ -1,0 +1,244 @@
+.dashboard-container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.user-info {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.user-info h3 {
+    margin: 0;
+    color: #333;
+}
+
+.user-role {
+    color: #666;
+    margin: 0.5rem 0 0;
+}
+
+.dashboard-nav {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-nav a:hover {
+    background: #f5f5f5;
+}
+
+.dashboard-nav a.active {
+    background: #4CAF50;
+    color: #fff;
+}
+
+.dashboard-nav i {
+    width: 20px;
+    text-align: center;
+}
+
+.dashboard-content {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .dashboard-sidebar {
+        width: 100%;
+    }
+}
+
+.comments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.comment-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.user-info {
+    /* display: flex; */
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.timestamp {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.comment-content {
+    margin: 1rem 0;
+    line-height: 1.6;
+}
+
+.comment-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.talent-link {
+    color: #007bff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.talent-link:hover {
+    text-decoration: underline;
+}
+
+.no-comments {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    grid-column: 1 / -1;
+}
+
+.no-comments i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ddd;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-sm {
+    font-size: 0.875rem;
+}
+
+/* Order table styles in user dashboard overview */
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+.order-table th,
+.order-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.order-table th {
+    background: #f5f5f5;
+    color: #333;
+    font-weight: 600;
+}
+
+.order-table tr:hover {
+    background: #fafafa;
+}
+
+.order-table .status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-transform: capitalize;
+}
+
+.order-table .status-badge.pending {
+    background: #ffc107;
+    color: #fff;
+}
+
+/* might need to modify the status badge */
+.order-table .status-badge.completed {
+    background: #4CAF50;
+    color: #fff;
+}
+
+.order-table .status-badge.cancelled {
+    background: #dc3545;
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .order-table {
+        font-size: 0.9rem;
+    }
+
+    .order-table th,
+    .order-table td {
+        padding: 0.75rem;
+    }
+}
