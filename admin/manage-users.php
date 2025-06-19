@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/database.php';
 include '../includes/timeout.php';
+include_once '../includes/talent-categories.php';
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -96,15 +97,18 @@ $result = mysqli_query($conn, $sql);
                         <div class="user-card">
                             <div class="user-info">
                                 <?php if (!empty($user['profile_picture'])): ?>
-                                    <img src="<?php echo htmlspecialchars($user['profile_picture']); ?>" alt="Profile Picture"
-                                        class="user-avatar">
+                                    <img src="../<?php echo htmlspecialchars($user['profile_picture']); ?>"
+                                        alt="Profile Picture" class="user-avatar">
+                                <?php else: ?>
+                                    <img src="../assets/images/default-avatar.png" alt="Default Avatar" class="user-avatar">
                                 <?php endif; ?>
                                 <div class="user-details">
                                     <h3><?php echo htmlspecialchars($user['full_name']); ?></h3>
                                     <p>Username: <?php echo htmlspecialchars($user['username']); ?></p>
                                     <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
                                     <p>Category:
-                                        <?php echo htmlspecialchars($user['talent_category'] ?? 'Not specified'); ?>
+                                        <?php $cat = $user['talent_category'] ?? '';
+                                        echo isset($talent_categories[$cat]) ? $talent_categories[$cat] : 'Not specified'; ?>
                                     </p>
                                     <p>Joined: <?php echo date('F j, Y', strtotime($user['created_at'])); ?></p>
                                 </div>
@@ -138,7 +142,7 @@ $result = mysqli_query($conn, $sql);
             </div>
         </div>
 
-        <?php include 'includes/footer-inc.php'; ?>
+        <?php include '../includes/footer-inc.php'; ?>
     </body>
 
 </html>

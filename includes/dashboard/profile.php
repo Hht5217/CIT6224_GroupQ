@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__ . '/../../includes/talent-categories.php';
 // Get user profile information
 $sql = "SELECT p.* FROM profiles p WHERE p.user_id = ?";
 $profile = [];
@@ -18,14 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $phone = $_POST['phone'];
     $bio = $_POST['bio'];
     $talent_category = $_POST['talent_category'];
-    
+
     // Handle profile picture upload
     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         $max_size = 5 * 1024 * 1024; // 5MB
         $filename = $_FILES['profile_picture']['name'];
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        
+
         // 验证文件类型
         if (!in_array($ext, $allowed)) {
             $error = "Invalid file type. Allowed types: " . implode(', ', $allowed);
@@ -33,42 +34,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         // 验证文件大小
         elseif ($_FILES['profile_picture']['size'] > $max_size) {
             $error = "File is too large. Maximum size is 5MB.";
-        }
-        else {
+        } else {
             // 创建上传目录
             $upload_dir = 'assets/images/profiles/';
             if (!file_exists($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
-            
+
             // 生成安全的文件名
             $new_filename = 'profile_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
             $upload_path = $upload_dir . $new_filename;
-            
+
             // 验证图片尺寸
             $image_info = getimagesize($_FILES['profile_picture']['tmp_name']);
             if ($image_info === false) {
                 $error = "Invalid image file.";
-            }
-            else {
+            } else {
                 $max_width = 1000;
                 $max_height = 1000;
                 if ($image_info[0] > $max_width || $image_info[1] > $max_height) {
                     // 创建临时图片
                     $source_image = imagecreatefromstring(file_get_contents($_FILES['profile_picture']['tmp_name']));
                     $new_image = imagecreatetruecolor($max_width, $max_height);
-                    
+
                     // 保持宽高比
                     $ratio = min($max_width / $image_info[0], $max_height / $image_info[1]);
                     $new_width = $image_info[0] * $ratio;
                     $new_height = $image_info[1] * $ratio;
-                    
+
                     // 调整图片大小
-                    imagecopyresampled($new_image, $source_image, 
-                        ($max_width - $new_width) / 2, ($max_height - $new_height) / 2, 
-                        0, 0, $new_width, $new_height, 
-                        $image_info[0], $image_info[1]);
-                    
+                    imagecopyresampled(
+                        $new_image,
+                        $source_image,
+                        ($max_width - $new_width) / 2,
+                        ($max_height - $new_height) / 2,
+                        0,
+                        0,
+                        $new_width,
+                        $new_height,
+                        $image_info[0],
+                        $image_info[1]
+                    );
+
                     // 保存调整后的图片
                     switch ($ext) {
                         case 'jpg':
@@ -82,24 +89,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                             imagegif($new_image, $upload_path);
                             break;
                     }
-                    
+
                     // 释放内存
                     imagedestroy($source_image);
                     imagedestroy($new_image);
-                }
-                else {
+                } else {
                     // 直接移动文件
                     if (!move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_path)) {
                         $error = "Failed to upload image.";
                     }
                 }
-                
+
                 if (!isset($error)) {
                     // 删除旧的头像文件
                     if (!empty($profile['profile_picture']) && file_exists($profile['profile_picture'])) {
                         unlink($profile['profile_picture']);
                     }
-                    
+
                     // Update profile picture in database
                     $stmt = $conn->prepare("UPDATE profiles SET profile_picture = ? WHERE user_id = ?");
                     $stmt->bind_param("si", $upload_path, $_SESSION['user_id']);
@@ -108,13 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             }
         }
     }
-    
+
     if (!isset($error)) {
         // Update user information
         $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE id = ?");
         $stmt->bind_param("ssi", $full_name, $email, $_SESSION['user_id']);
         $stmt->execute();
-        
+
         // Update or insert profile information
         if (empty($profile)) {
             $stmt = $conn->prepare("INSERT INTO profiles (user_id, phone, bio, talent_category) VALUES (?, ?, ?, ?)");
@@ -124,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $stmt->bind_param("sssi", $phone, $bio, $talent_category, $_SESSION['user_id']);
         }
         $stmt->execute();
-        
+
         // Refresh the page
         header("Location: user-dashboard.php?page=profile");
         exit();
@@ -136,67 +142,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
 <div class="dashboard-card">
     <h2>My Profile</h2>
-    
+
     <?php if (isset($error)): ?>
-    <div class="alert alert-danger">
-        <?php echo htmlspecialchars($error); ?>
-    </div>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
     <?php endif; ?>
-    
+
     <form method="POST" enctype="multipart/form-data" class="profile-form">
         <input type="hidden" name="action" value="update_profile">
-        
+
         <div class="form-group">
-            <label for="profile_picture">Profile Picture</label>
             <div class="profile-picture-upload">
-                <img src="<?php echo $profile['profile_picture'] ?? 'assets/images/default-avatar.png'; ?>" alt="Profile Picture" id="preview">
-                <input type="file" name="profile_picture" id="profile_picture" accept="image/jpeg,image/png,image/gif" onchange="previewImage(this)">
+                <img src="<?php echo $profile['profile_picture'] ?? 'assets/images/default-avatar.png'; ?>"
+                    alt="Profile Picture" id="preview">
+                <input type="file" name="profile_picture" id="profile_picture" accept="image/jpeg,image/png,image/gif"
+                    onchange="previewImage(this)">
                 <small class="form-text text-muted">Maximum file size: 5MB. Allowed formats: JPG, PNG, GIF</small>
             </div>
         </div>
-        
+
         <div class="form-row">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" value="<?php echo htmlspecialchars($user['username']); ?>" disabled>
             </div>
-            
+
             <div class="form-group">
                 <label for="full_name">Full Name</label>
-                <input type="text" name="full_name" id="full_name" value="<?php echo htmlspecialchars($user['full_name']); ?>" required>
+                <input type="text" name="full_name" id="full_name"
+                    value="<?php echo htmlspecialchars($user['full_name']); ?>" required>
             </div>
         </div>
-        
+
         <div class="form-row">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>"
+                    required>
             </div>
-            
+
             <div class="form-group">
                 <label for="phone">Phone</label>
-                <input type="tel" name="phone" id="phone" value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>">
+                <input type="tel" name="phone" id="phone"
+                    value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>">
             </div>
         </div>
-        
+
         <div class="form-group">
             <label for="talent_category">Talent Category</label>
             <select name="talent_category" id="talent_category">
                 <option value="">Select a category</option>
-                <option value="music" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == 'music') ? 'selected' : ''; ?>>Music</option>
-                <option value="art" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == 'art') ? 'selected' : ''; ?>>Art</option>
-                <option value="writing" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == 'writing') ? 'selected' : ''; ?>>Writing</option>
-                <option value="photography" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == 'photography') ? 'selected' : ''; ?>>Photography</option>
-                <option value="design" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == 'design') ? 'selected' : ''; ?>>Design</option>
-                <option value="other" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == 'other') ? 'selected' : ''; ?>>Other</option>
+                <?php foreach ($talent_categories as $key => $label): ?>
+                    <option value="<?php echo $key; ?>" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == $key) ? 'selected' : ''; ?>>
+                        <?php echo $label; ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
         </div>
-        
+
         <div class="form-group">
             <label for="bio">Bio</label>
             <textarea name="bio" id="bio" rows="4"><?php echo htmlspecialchars($profile['bio'] ?? ''); ?></textarea>
         </div>
-        
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
@@ -204,13 +213,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 </div>
 
 <script>
-function previewImage(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('preview').src = e.target.result;
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('preview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-        reader.readAsDataURL(input.files[0]);
     }
-}
-</script> 
+</script>

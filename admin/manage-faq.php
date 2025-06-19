@@ -165,8 +165,8 @@ $faqs = mysqli_query($conn, $sql);
                 </form>
             </div>
         </div>
-        <?php include 'includes/footer-inc.php'; ?>
 
+        <?php include '../includes/footer-inc.php'; ?>
         <script>
             function editFAQ(id, question, answer) {
                 document.getElementById('edit_id').value = id;

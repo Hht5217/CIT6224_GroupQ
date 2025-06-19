@@ -147,9 +147,9 @@ mysqli_stmt_execute($stmt);
 $notifications = mysqli_stmt_get_result($stmt);
 
 // Debug information
-echo "<!-- Debug Info: -->";
-echo "<!-- User ID: " . $user_id . " -->";
-echo "<!-- Comments count: " . count($comments) . " -->";
+// echo "<!-- Debug Info: -->";
+// echo "<!-- User ID: " . $user_id . " -->";
+// echo "<!-- Comments count: " . count($comments) . " -->";
 ?>
 
 <!DOCTYPE html>

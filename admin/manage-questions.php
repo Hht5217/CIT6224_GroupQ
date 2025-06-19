@@ -132,7 +132,7 @@ $questions = mysqli_query($conn, $sql);
             </div>
         </div>
 
-        <?php include 'includes/footer-inc.php'; ?>
+        <?php include '../includes/footer-inc.php'; ?>
 
         <script>
             function showAnswerForm(id) {

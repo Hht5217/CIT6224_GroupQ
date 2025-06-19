@@ -90,7 +90,7 @@ $recent_talents = mysqli_query($conn, $sql);
                 </div>
             </div>
         </div>
-        <?php include 'includes/footer-inc.php'; ?>
+        <?php include '../includes/footer-inc.php'; ?>
     </body>
 
 </html>

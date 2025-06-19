@@ -2,6 +2,7 @@
 session_start();
 require_once 'config/database.php';
 include 'includes/timeout.php';
+include_once 'includes/talent-categories.php';
 
 // Get filter parameters
 $category = isset($_GET['category']) ? $_GET['category'] : '';
@@ -65,11 +66,11 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                     <div class="form-group">
                         <select name="category" class="form-control">
                             <option value="">All Categories</option>
-                            <option value="Music" <?php echo $category == 'Music' ? 'selected' : ''; ?>>Music</option>
-                            <option value="Art" <?php echo $category == 'Art' ? 'selected' : ''; ?>>Art</option>
-                            <option value="Tech" <?php echo $category == 'Tech' ? 'selected' : ''; ?>>Tech</option>
-                            <option value="Writing" <?php echo $category == 'Writing' ? 'selected' : ''; ?>>Writing
-                            </option>
+                            <?php foreach ($talent_categories as $key => $label): ?>
+                                <option value="<?php echo $key; ?>" <?php echo $category == $key ? 'selected' : ''; ?>>
+                                    <?php echo $label; ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
@@ -84,11 +85,17 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                             <?php if (!empty($talent['profile_picture'])): ?>
                                 <img src="<?php echo $talent['profile_picture']; ?>" alt="<?php echo $talent['full_name']; ?>"
                                     style="width: 100%; height: 200px; object-fit: cover;">
+                            <?php else: ?>
+                                <img src="assets/images/default-avatar.png" alt="Default Avatar"
+                                    style="width: 100%; height: 200px; object-fit: cover;">
                             <?php endif; ?>
                             <h3><?php echo htmlspecialchars($talent['full_name']); ?></h3>
                             <p><?php echo htmlspecialchars($talent['description'] ?? ''); ?></p>
                             <div class="talent-meta">
-                                <p>Category: <?php echo htmlspecialchars($talent['talent_category'] ?? 'Not specified'); ?>
+                                <p>Category: <?php
+                                $cat = $talent['talent_category'] ?? '';
+                                echo isset($talent_categories[$cat]) ? $talent_categories[$cat] : 'Not specified';
+                                ?>
                                 </p>
                                 <a href="talent-details.php?id=<?php echo $talent['id']; ?>" class="btn">View Details</a>
                             </div>

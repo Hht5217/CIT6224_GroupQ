@@ -169,7 +169,7 @@ $announcements = mysqli_query($conn, $sql);
                 </form>
             </div>
         </div>
-        <?php include 'includes/footer-inc.php'; ?>
+        <?php include '../includes/footer-inc.php'; ?>
 
         <script>
             function editAnnouncement(id, title, content) {
