@@ -31,9 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         mysqli_stmt_bind_param($stmt, "ii", $user_id, $talent_id);
                         mysqli_stmt_execute($stmt);
 
-                        // Update statistics
-                        $sql = "INSERT INTO statistics (talent_id, favorites) VALUES (?, 1) 
-                               ON DUPLICATE KEY UPDATE favorites = favorites + 1";
+                        // Update talents favorites_count
+                        $sql = "UPDATE talents SET favorites_count = favorites_count + 1 WHERE id = ?";
                         if ($stmt = mysqli_prepare($conn, $sql)) {
                             mysqli_stmt_bind_param($stmt, "i", $talent_id);
                             mysqli_stmt_execute($stmt);
@@ -60,9 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         mysqli_stmt_bind_param($stmt, "ii", $user_id, $talent_id);
                         mysqli_stmt_execute($stmt);
 
-                        // Update statistics
-                        $sql = "UPDATE statistics SET favorites = favorites - 1 
-                               WHERE talent_id = ? AND favorites > 0";
+                        // Update talents favorite_count
+                        $sql = "UPDATE talents SET favorites_count = favorites_count - 1 WHERE id = ? AND favorites_count > 0";
                         if ($stmt = mysqli_prepare($conn, $sql)) {
                             mysqli_stmt_bind_param($stmt, "i", $talent_id);
                             mysqli_stmt_execute($stmt);

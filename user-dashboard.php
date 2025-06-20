@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config/database.php';
+require_once 'includes/file-upload-delete.php';
 include 'includes/timeout.php';
 
 // Check if user is logged in
@@ -66,12 +67,12 @@ mysqli_stmt_execute($stmt);
 $resources = mysqli_stmt_get_result($stmt);
 
 // Get user's favorites
-$sql = "SELECT f.*, u.username, u.full_name, p.profile_picture, p.talent_category 
-        FROM favorites f 
-        JOIN users u ON f.talent_id = u.id 
-        LEFT JOIN profiles p ON u.id = p.user_id 
-        WHERE f.user_id = ? 
-        ORDER BY f.created_at DESC";
+$sql = "SELECT f.talent_id, t.title, t.category, u.full_name
+            FROM favorites f 
+            JOIN talents t ON f.talent_id = t.id 
+            JOIN users u ON t.user_id = u.id 
+            WHERE f.user_id = ? 
+            ORDER BY f.created_at DESC";
 $favorites = [];
 if ($stmt = mysqli_prepare($conn, $sql)) {
     mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
@@ -83,13 +84,12 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
 }
 
 // Get comments for user's talents
-$sql = "SELECT c.*, u.username, u.full_name, p.profile_picture,
-        t.title as talent_title
-        FROM comments c 
-        JOIN users u ON c.user_id = u.id 
+$sql = "SELECT c.*, u.username, u.full_name, p.profile_picture, t.title as talent_title
+        FROM comments c
+        JOIN users u ON c.user_id = u.id
         LEFT JOIN profiles p ON u.id = p.user_id
-        JOIN talents t ON c.commented_user_id = t.user_id
-        WHERE c.commented_user_id = ? 
+        JOIN talents t ON c.talent_id = t.id
+        WHERE t.user_id = ?
         ORDER BY c.created_at DESC";
 $comments = [];
 if ($stmt = mysqli_prepare($conn, $sql)) {
@@ -98,36 +98,6 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
     $result = mysqli_stmt_get_result($stmt);
     while ($row = mysqli_fetch_assoc($result)) {
         $comments[] = $row;
-    }
-}
-
-// Get user's comments
-$sql = "SELECT c.*, u.username, u.full_name, p.profile_picture
-        FROM comments c 
-        JOIN users u ON c.user_id = u.id 
-        LEFT JOIN profiles p ON u.id = p.user_id
-        WHERE c.user_id = ? 
-        ORDER BY c.created_at DESC";
-$user_comments = [];
-if ($stmt = mysqli_prepare($conn, $sql)) {
-    mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    while ($row = mysqli_fetch_assoc($result)) {
-        $user_comments[] = $row;
-    }
-}
-
-// Handle comment deletion
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete-comment'])) {
-    $comment_id = $_POST['comment_id'];
-    $sql = "DELETE FROM comments WHERE id = ? AND user_id = ?";
-    if ($stmt = mysqli_prepare($conn, $sql)) {
-        mysqli_stmt_bind_param($stmt, "ii", $comment_id, $_SESSION['user_id']);
-        if (mysqli_stmt_execute($stmt)) {
-            header("Location: " . $_SERVER['REQUEST_URI']);
-            exit();
-        }
     }
 }
 ?>
@@ -168,20 +138,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete-comment'])) {
                     <a href="?page=profile" class="<?php echo $current_page == 'profile' ? 'active' : ''; ?>">
                         <i class="fas fa-user"></i> My Profile
                     </a>
-                    <a href="?page=products" class="<?php echo $current_page == 'products' ? 'active' : ''; ?>">
-                        <i class="fas fa-box"></i> My Products
-                    </a>
-                    <a href="?page=orders" class="<?php echo $current_page == 'orders' ? 'active' : ''; ?>">
-                        <i class="fas fa-shopping-bag"></i> My Orders
-                    </a>
-                    <a href="?page=comments" class="<?php echo $current_page == 'comments' ? 'active' : ''; ?>">
-                        <i class="fas fa-comments"></i> My Comments
+                    <a href="?page=talents" class="<?php echo $current_page == 'talents' ? 'active' : ''; ?>">
+                        <i class="fas fa-star"></i> My Talents
                     </a>
                     <a href="?page=resources" class="<?php echo $current_page == 'resources' ? 'active' : ''; ?>">
                         <i class="fas fa-file-alt"></i> My Resources
                     </a>
                     <a href="?page=favorites" class="<?php echo $current_page == 'favorites' ? 'active' : ''; ?>">
                         <i class="fas fa-heart"></i> My Favorites
+                    </a>
+                    <a href="?page=comments" class="<?php echo $current_page == 'comments' ? 'active' : ''; ?>">
+                        <i class="fas fa-comments"></i> My Comments
+                    </a>
+                    <a href="?page=products" class="<?php echo $current_page == 'products' ? 'active' : ''; ?>">
+                        <i class="fas fa-box"></i> My Products
+                    </a>
+                    <a href="?page=orders" class="<?php echo $current_page == 'orders' ? 'active' : ''; ?>">
+                        <i class="fas fa-shopping-bag"></i> My Orders
                     </a>
                 </nav>
             </div>

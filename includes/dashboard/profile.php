@@ -1,5 +1,4 @@
 <?php
-include_once __DIR__ . '/../../includes/talent-categories.php';
 // Get user profile information
 $sql = "SELECT p.* FROM profiles p WHERE p.user_id = ?";
 $profile = [];
@@ -187,18 +186,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 <input type="tel" name="phone" id="phone"
                     value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>">
             </div>
-        </div>
-
-        <div class="form-group">
-            <label for="talent_category">Talent Category</label>
-            <select name="talent_category" id="talent_category">
-                <option value="">Select a category</option>
-                <?php foreach ($talent_categories as $key => $label): ?>
-                    <option value="<?php echo $key; ?>" <?php echo (isset($profile['talent_category']) && $profile['talent_category'] == $key) ? 'selected' : ''; ?>>
-                        <?php echo $label; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
         </div>
 
         <div class="form-group">

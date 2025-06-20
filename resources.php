@@ -1,10 +1,11 @@
 <?php
 session_start();
 require_once 'config/database.php';
+require_once 'includes/file-upload-delete.php';
 include 'includes/timeout.php';
 
-// Get all resources
-$sql = "SELECT r.*, u.username FROM resources r JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC";
+// Get downloadable resources
+$sql = "SELECT r.*, u.username FROM resources r JOIN users u ON r.user_id = u.id WHERE r.is_downloadable = 1 ORDER BY r.created_at DESC";
 $resources = mysqli_query($conn, $sql);
 ?>
 
@@ -43,8 +44,7 @@ $resources = mysqli_query($conn, $sql);
                                 </div>
                                 <?php if ($resource['description']): ?>
                                     <p class="resource-description">
-                                        <?php echo nl2br(htmlspecialchars($resource['description'])); ?>
-                                    </p>
+                                        <?php echo nl2br(htmlspecialchars($resource['description'])); ?></p>
                                 <?php endif; ?>
                             </div>
                             <div class="resource-actions">
@@ -59,18 +59,3 @@ $resources = mysqli_query($conn, $sql);
     </body>
 
 </html>
-
-<?php
-function formatFileSize($bytes)
-{
-    if ($bytes >= 1073741824) {
-        return number_format($bytes / 1073741824, 2) . ' GB';
-    } elseif ($bytes >= 1048576) {
-        return number_format($bytes / 1048576, 2) . ' MB';
-    } elseif ($bytes >= 1024) {
-        return number_format($bytes / 1024, 2) . ' KB';
-    } else {
-        return $bytes . ' bytes';
-    }
-}
-?>
