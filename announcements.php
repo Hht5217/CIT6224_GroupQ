@@ -3,7 +3,7 @@ session_start();
 require_once 'config/database.php';
 include 'includes/timeout.php';
 
-// 获取所有公告
+// Get all announcements
 $sql = "SELECT * FROM announcements ORDER BY created_at DESC";
 $announcements = mysqli_query($conn, $sql);
 ?>

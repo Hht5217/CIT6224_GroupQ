@@ -125,10 +125,10 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                 <div class="user-info">
                     <img src="<?php echo !empty($profile['profile_picture']) ? $profile['profile_picture'] : 'assets/images/default-avatar.png'; ?>"
                         alt="Profile Picture" class="profile-picture">
-                    <div>
-                        <h3><?php echo htmlspecialchars($user['full_name']); ?></h3>
-                        <p class="user-role"><?php echo ucfirst($user['role']); ?></p>
-                    </div>
+
+                    <h3><?php echo htmlspecialchars($user['full_name']); ?></h3>
+                    <p class="user-role"><?php echo ucfirst($user['role']); ?></p>
+
                 </div>
 
                 <nav class="dashboard-nav">

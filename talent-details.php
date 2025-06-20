@@ -54,9 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $stmt = $conn->prepare("UPDATE resources SET is_downloadable = ? WHERE talent_id = ? AND user_id = ?");
     $stmt->bind_param("iii", $is_downloadable, $talent_id, $_SESSION['user_id']);
     if ($stmt->execute()) {
-        $stmt = $conn->prepare("UPDATE talents SET is_downloadable = ? WHERE id = ? AND user_id = ?");
-        $stmt->bind_param("iii", $is_downloadable, $talent_id, $_SESSION['user_id']);
-        $stmt->execute();
         $success = "Downloadable status updated successfully";
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit();
@@ -174,8 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             $stmt = $conn->prepare("UPDATE talents SET media_path = ? WHERE id = ?");
             $stmt->bind_param("si", $result['filepath'], $talent_id);
             if ($stmt->execute()) {
-                $stmt = $conn->prepare("UPDATE resources SET file_name = ?, file_path = ?, file_type = ?, file_size = ? WHERE talent_id = ?");
-                $stmt->bind_param("sssii", $result['filename'], $result['filepath'], $result['file_type'], $result['file_size'], $talent_id);
+                $stmt = $conn->prepare("UPDATE resources SET file_name = ?, file_path = ?, file_type = ?, file_size = ?, is_downloadable = ? WHERE talent_id = ?");
+                $stmt->bind_param("sssiii", $result['filename'], $result['filepath'], $result['file_type'], $result['file_size'], $is_downloadable, $talent_id);
                 if ($stmt->execute()) {
                     $success = "File replaced successfully";
                 } else {
@@ -396,36 +393,40 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                     echo '<span>No preview available.</span>';
                                 }
                                 ?>
-                                <?php if ($resource_is_downloadable && !empty($talent['media_path'])): ?>
-                                    <a href="<?php echo htmlspecialchars($talent['media_path']); ?>" download
-                                        class="btn btn-success" style="margin-top:1rem;display:inline-block;">
-                                        <i class="fas fa-download"></i> Download File
-                                    </a>
-                                <?php endif; ?>
-                                <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
-                                    <button class="btn btn-primary" onclick="showUploadForm()">
-                                        <i class="fas fa-upload"></i> Replace File
-                                    </button>
-                                    <div id="uploadForm" class="upload-form" style="display: none;">
-                                        <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="post"
-                                            enctype="multipart/form-data" onsubmit="return validateFileSize();">
-                                            <input type="hidden" name="action" value="replace_file">
-                                            <div class="form-group">
-                                                <label for="file">New File</label>
-                                                <input type="file" id="file" name="file" class="form-control"
-                                                    data-max-size="<?php echo $maxSizeMB; ?>" required>
-                                                <small class="form-text">Supported types: JPEG, PNG, GIF, MP4, WEBM, OGG, MP3,
-                                                    WAV, TXT, HTML, CSS, JS, PDF, ZIP, CSV, JSON. Max size:
-                                                    <?php echo number_format($maxSizeMB, 2); ?>MB</small>
-                                            </div>
-                                            <div class="form-actions">
-                                                <button type="submit" class="btn btn-primary">Upload File</button>
-                                                <button type="button" class="btn btn-secondary"
-                                                    onclick="hideUploadForm()">Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                <?php endif; ?>
+                                <div>
+                                    <?php if ($resource_is_downloadable && !empty($talent['media_path'])): ?>
+                                        <a href="<?php echo htmlspecialchars($talent['media_path']); ?>" download
+                                            class="btn btn-success" style="margin-top:1rem;display:inline-block;">
+                                            <i class="fas fa-download"></i> Download File
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
+                                        <button class="btn btn-primary" onclick="showUploadForm()">
+                                            <i class="fas fa-upload"></i> Replace File
+                                        </button>
+                                        <div id="uploadForm" class="upload-form" style="display: none;">
+                                            <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>"
+                                                method="post" enctype="multipart/form-data"
+                                                onsubmit="return validateFileSize();">
+                                                <input type="hidden" name="action" value="replace_file">
+                                                <div class="form-group">
+                                                    <label for="file">New File</label>
+                                                    <input type="file" id="file" name="file" class="form-control"
+                                                        data-max-size="<?php echo $maxSizeMB; ?>" required>
+                                                    <small class="form-text">Supported types: JPEG, PNG, GIF, MP4, WEBM, OGG,
+                                                        MP3,
+                                                        WAV, TXT, HTML, CSS, JS, PDF, ZIP, CSV, JSON. Max size:
+                                                        <?php echo number_format($maxSizeMB, 2); ?>MB</small>
+                                                </div>
+                                                <div class="form-actions">
+                                                    <button type="submit" class="btn btn-primary">Upload File</button>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        onclick="hideUploadForm()">Cancel</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                             <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
                                 <form method="POST" class="downloadable-form">

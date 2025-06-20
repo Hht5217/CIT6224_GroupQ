@@ -3,16 +3,18 @@ session_start();
 require_once '../config/database.php';
 include '../includes/timeout.php';
 
-// 检查是否是管理员
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("location: ../login.php");
-    exit;
+// Check if user is logged in and is admin
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+} elseif ($_SESSION['role'] !== 'admin') {
+    header("Location: ../index.php");
+    exit();
 }
-
 $error = '';
 $success = '';
 
-// 处理公告添加
+// Handling announcements
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     if ($_POST['action'] == 'add') {
         $title = trim($_POST['title']);
@@ -32,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
             }
         }
     }
-    // 处理公告编辑
+    // Edit announcement
     elseif ($_POST['action'] == 'edit') {
         $id = $_POST['id'];
         $title = trim($_POST['title']);
@@ -52,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
             }
         }
     }
-    // 处理公告删除
+    // Delete announcment
     elseif ($_POST['action'] == 'delete') {
         $id = $_POST['id'];
 
@@ -68,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     }
 }
 
-// 获取所有公告
+// Get all announcements
 $sql = "SELECT * FROM announcements ORDER BY created_at DESC";
 $announcements = mysqli_query($conn, $sql);
 ?>

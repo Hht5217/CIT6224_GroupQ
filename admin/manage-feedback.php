@@ -4,9 +4,12 @@ require_once '../config/database.php';
 include '../includes/timeout.php';
 
 // Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("location: ../login.php");
-    exit;
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+} elseif ($_SESSION['role'] !== 'admin') {
+    header("Location: ../index.php");
+    exit();
 }
 
 $error = '';

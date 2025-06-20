@@ -54,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         if ($result['error']) {
             $error = $result['error'];
         } else {
-            $stmt = $conn->prepare("INSERT INTO talents (user_id, title, description, category, media_path, is_downloadable) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("issssi", $_SESSION['user_id'], $title, $description, $category, $result['filepath'], $is_downloadable);
+            $stmt = $conn->prepare("INSERT INTO talents (user_id, title, description, category, media_path) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("issss", $_SESSION['user_id'], $title, $description, $category, $result['filepath']);
 
             if ($stmt->execute()) {
                 $talent_id = $stmt->insert_id;

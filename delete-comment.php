@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id']) || !isset($_POST['comment_id'])) {
 $comment_id = (int) $_POST['comment_id'];
 $user_id = $_SESSION['user_id'];
 
-// 检查评论是否存在且用户是否有权限删除
+// Check if the comment exists and belongs to the user or is a reply to the user
 $sql = "SELECT * FROM comments WHERE id = ?";
 if ($stmt = mysqli_prepare($conn, $sql)) {
     mysqli_stmt_bind_param($stmt, "i", $comment_id);
@@ -22,7 +22,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
     $comment = mysqli_fetch_assoc($result);
 
     if ($comment && ($comment['user_id'] == $user_id || $comment['commented_user_id'] == $user_id)) {
-        // 删除评论及其所有回复
+        // Delete the comment and all its replies
         $sql = "DELETE FROM comments WHERE id = ? OR parent_id = ?";
         if ($stmt = mysqli_prepare($conn, $sql)) {
             mysqli_stmt_bind_param($stmt, "ii", $comment_id, $comment_id);

@@ -5,8 +5,11 @@ include '../includes/timeout.php';
 include_once '../includes/talent-categories.php';
 
 // Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
+    exit();
+} elseif ($_SESSION['role'] !== 'admin') {
+    header("Location: ../index.php");
     exit();
 }
 
@@ -23,9 +26,31 @@ if (isset($_POST['update_role'])) {
         mysqli_stmt_bind_param($stmt, "si", $new_role, $user_id);
         if (mysqli_stmt_execute($stmt)) {
             $success = "User role updated successfully";
+            // Check if the updated user is the current user
+            if ($user_id == $_SESSION['user_id']) {
+                // Refresh the current user's role from the database
+                $sql = "SELECT role FROM users WHERE id = ?";
+                if ($stmt = mysqli_prepare($conn, $sql)) {
+                    mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
+                    mysqli_stmt_execute($stmt);
+                    mysqli_stmt_bind_result($stmt, $current_role);
+                    mysqli_stmt_fetch($stmt);
+                    mysqli_stmt_close($stmt);
+                    $_SESSION['role'] = $current_role; // Update session role
+                    if ($current_role !== 'admin') {
+                        // Redirect to index.php if no longer admin
+                        header("Location: ../index.php");
+                        exit();
+                    }
+                }
+            }
+            // Redirect to prevent form resubmission for other users
+            header("Location: " . htmlspecialchars($_SERVER["PHP_SELF"]) . "?success=role_updated");
+            exit();
         } else {
             $error = "Error updating user role";
         }
+        mysqli_stmt_close($stmt);
     }
 }
 
@@ -33,32 +58,40 @@ if (isset($_POST['update_role'])) {
 if (isset($_POST['delete_user'])) {
     $user_id = $_POST['user_id'];
 
-    // First delete related records
-    $tables = ['profiles', 'comments', 'resources', 'feedback'];
-    foreach ($tables as $table) {
-        $sql = "DELETE FROM $table WHERE user_id = ?";
+    // Prevent deletion of user_id = 1 (admin)
+    if ($user_id == 1) {
+        $error = "Cannot delete the primary admin account.";
+    } else {
+        // Delete related records from all referenced tables
+        $tables = ['cart', 'comments', 'favorites', 'feedback', 'orders', 'products', 'profiles', 'resources', 'talents', 'user_questions'];
+        foreach ($tables as $table) {
+            $sql = "DELETE FROM $table WHERE user_id = ?";
+            if ($stmt = mysqli_prepare($conn, $sql)) {
+                mysqli_stmt_bind_param($stmt, "i", $user_id);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            }
+        }
+
+        // Delete the user
+        $sql = "DELETE FROM users WHERE id = ?";
         if ($stmt = mysqli_prepare($conn, $sql)) {
             mysqli_stmt_bind_param($stmt, "i", $user_id);
-            mysqli_stmt_execute($stmt);
-        }
-    }
-
-    // Then delete the user
-    $sql = "DELETE FROM users WHERE id = ?";
-    if ($stmt = mysqli_prepare($conn, $sql)) {
-        mysqli_stmt_bind_param($stmt, "i", $user_id);
-        if (mysqli_stmt_execute($stmt)) {
-            $success = "User deleted successfully";
-        } else {
-            $error = "Error deleting user";
+            if (mysqli_stmt_execute($stmt)) {
+                $success = "User deleted successfully";
+            } else {
+                $error = "Error deleting user: " . mysqli_error($conn);
+            }
+            mysqli_stmt_close($stmt);
         }
     }
 }
 
-// Get all users with their profile information
-$sql = "SELECT u.*, p.profile_picture, p.talent_category, p.bio 
+// Get all users with their profile information, excluding user_id = 1
+$sql = "SELECT u.*, p.profile_picture, p.bio 
         FROM users u 
         LEFT JOIN profiles p ON u.id = p.user_id 
+        WHERE u.id != 1
         ORDER BY u.created_at DESC";
 $result = mysqli_query($conn, $sql);
 ?>
@@ -106,10 +139,7 @@ $result = mysqli_query($conn, $sql);
                                     <h3><?php echo htmlspecialchars($user['full_name']); ?></h3>
                                     <p>Username: <?php echo htmlspecialchars($user['username']); ?></p>
                                     <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
-                                    <p>Category:
-                                        <?php $cat = $user['talent_category'] ?? '';
-                                        echo isset($talent_categories[$cat]) ? $talent_categories[$cat] : 'Not specified'; ?>
-                                    </p>
+                                    <p>Role: <?php echo htmlspecialchars(ucfirst($user['role'])); ?></p>
                                     <p>Joined: <?php echo date('F j, Y', strtotime($user['created_at'])); ?></p>
                                 </div>
                             </div>

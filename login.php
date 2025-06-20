@@ -4,6 +4,12 @@ require_once 'config/database.php';
 
 $error = '';
 
+// Redirect logged-in users to index.php
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
@@ -23,12 +29,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     mysqli_stmt_bind_result($stmt, $id, $username, $db_password, $role);
                     if (mysqli_stmt_fetch($stmt)) {
                         if ($password == $db_password) {
+                            // Clear existing session data and set new session
+                            session_unset();
+                            session_destroy();
+                            session_start();
                             $_SESSION['user_id'] = $id;
                             $_SESSION['username'] = $username;
                             $_SESSION['role'] = $role;
                             $_SESSION['login_success'] = true;
                             header("location: index.php");
-                            exit;
+                            exit();
                         } else {
                             $error = "Invalid password";
                         }

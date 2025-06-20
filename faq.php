@@ -3,7 +3,7 @@ session_start();
 require_once 'config/database.php';
 include 'includes/timeout.php';
 
-// 获取所有FAQ
+// Get all FAQs from the database
 $sql = "SELECT * FROM faq ORDER BY created_at DESC";
 $faqs = mysqli_query($conn, $sql);
 ?>

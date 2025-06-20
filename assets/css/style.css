@@ -501,7 +501,6 @@ body {
 }
 
 .user-info {
-    display: flex;
     gap: 1.5rem;
     margin-bottom: 1.5rem;
 }

@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $email = $_POST['email'];
     $phone = $_POST['phone'];
     $bio = $_POST['bio'];
-    $talent_category = $_POST['talent_category'];
 
     // Handle profile picture upload
     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
@@ -26,25 +25,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $filename = $_FILES['profile_picture']['name'];
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        // 验证文件类型
+        // Validate file type
         if (!in_array($ext, $allowed)) {
             $error = "Invalid file type. Allowed types: " . implode(', ', $allowed);
         }
-        // 验证文件大小
+        // Validate file size
         elseif ($_FILES['profile_picture']['size'] > $max_size) {
             $error = "File is too large. Maximum size is 5MB.";
         } else {
-            // 创建上传目录
+            // Make upload directory string
             $upload_dir = 'assets/images/profiles/';
             if (!file_exists($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
 
-            // 生成安全的文件名
+            // Generate a safe file name
             $new_filename = 'profile_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
             $upload_path = $upload_dir . $new_filename;
 
-            // 验证图片尺寸
+            // Validate image size
             $image_info = getimagesize($_FILES['profile_picture']['tmp_name']);
             if ($image_info === false) {
                 $error = "Invalid image file.";
@@ -52,16 +51,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 $max_width = 1000;
                 $max_height = 1000;
                 if ($image_info[0] > $max_width || $image_info[1] > $max_height) {
-                    // 创建临时图片
+                    // Create temp image
                     $source_image = imagecreatefromstring(file_get_contents($_FILES['profile_picture']['tmp_name']));
                     $new_image = imagecreatetruecolor($max_width, $max_height);
 
-                    // 保持宽高比
+                    // Maintain aspect ratio
                     $ratio = min($max_width / $image_info[0], $max_height / $image_info[1]);
                     $new_width = $image_info[0] * $ratio;
                     $new_height = $image_info[1] * $ratio;
 
-                    // 调整图片大小
+                    // Resize the image
                     imagecopyresampled(
                         $new_image,
                         $source_image,
@@ -75,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         $image_info[1]
                     );
 
-                    // 保存调整后的图片
+                    // Save the resized image
                     switch ($ext) {
                         case 'jpg':
                         case 'jpeg':
@@ -89,18 +88,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                             break;
                     }
 
-                    // 释放内存
+                    // Release memory
                     imagedestroy($source_image);
                     imagedestroy($new_image);
                 } else {
-                    // 直接移动文件
+                    // Move the file directly
                     if (!move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_path)) {
                         $error = "Failed to upload image.";
                     }
                 }
 
                 if (!isset($error)) {
-                    // 删除旧的头像文件
+                    // Delete old profile picture
                     if (!empty($profile['profile_picture']) && file_exists($profile['profile_picture'])) {
                         unlink($profile['profile_picture']);
                     }
@@ -122,11 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
         // Update or insert profile information
         if (empty($profile)) {
-            $stmt = $conn->prepare("INSERT INTO profiles (user_id, phone, bio, talent_category) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("isss", $_SESSION['user_id'], $phone, $bio, $talent_category);
+            $stmt = $conn->prepare("INSERT INTO profiles (user_id, phone, bio) VALUES (?, ?, ?)");
+            $stmt->bind_param("iss", $_SESSION['user_id'], $phone, $bio);
         } else {
-            $stmt = $conn->prepare("UPDATE profiles SET phone = ?, bio = ?, talent_category = ? WHERE user_id = ?");
-            $stmt->bind_param("sssi", $phone, $bio, $talent_category, $_SESSION['user_id']);
+            $stmt = $conn->prepare("UPDATE profiles SET phone = ?, bio = ? WHERE user_id = ?");
+            $stmt->bind_param("ssi", $phone, $bio, $_SESSION['user_id']);
         }
         $stmt->execute();
 

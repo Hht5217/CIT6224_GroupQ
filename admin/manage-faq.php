@@ -3,16 +3,19 @@ session_start();
 require_once '../config/database.php';
 include '../includes/timeout.php';
 
-// 检查是否是管理员
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("location: ../login.php");
-    exit;
+// Check if user is logged in and is admin
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+} elseif ($_SESSION['role'] !== 'admin') {
+    header("Location: ../index.php");
+    exit();
 }
 
 $error = '';
 $success = '';
 
-// 处理FAQ添加
+// Handle FAQs
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     if ($_POST['action'] == 'add') {
         $question = trim($_POST['question']);
@@ -32,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
             }
         }
     }
-    // 处理FAQ编辑
+    // Edit FAQs
     elseif ($_POST['action'] == 'edit') {
         $id = $_POST['id'];
         $question = trim($_POST['question']);
@@ -52,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
             }
         }
     }
-    // 处理FAQ删除
+    // Delete FAQs
     elseif ($_POST['action'] == 'delete') {
         $id = $_POST['id'];
 
@@ -68,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     }
 }
 
-// 获取所有FAQ
+// Get all FAQs
 $sql = "SELECT * FROM faq ORDER BY created_at DESC";
 $faqs = mysqli_query($conn, $sql);
 ?>

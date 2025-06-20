@@ -4,18 +4,26 @@ require_once '../config/database.php';
 include '../includes/timeout.php';
 
 // Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("location: ../login.php");
-    exit;
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+} elseif ($_SESSION['role'] !== 'admin') {
+    header("Location: ../index.php");
+    exit();
 }
 
 // Get statistics
 $stats = array();
 
-// Total users
-$sql = "SELECT COUNT(*) as total FROM users WHERE role = 'user'";
+// Total users (excluding user_id = 1)
+$sql = "SELECT COUNT(*) as total FROM users WHERE id != 1";
 $result = mysqli_query($conn, $sql);
 $stats['users'] = mysqli_fetch_assoc($result)['total'];
+
+// Total admins (excluding user_id = 1)
+$sql = "SELECT COUNT(*) as total FROM users WHERE role = 'admin' AND id != 1";
+$result = mysqli_query($conn, $sql);
+$stats['admins'] = mysqli_fetch_assoc($result)['total'];
 
 // Total talents
 $sql = "SELECT COUNT(*) as total FROM talents";
@@ -53,7 +61,8 @@ $recent_talents = mysqli_query($conn, $sql);
             <div class="stats-grid">
                 <div class="card">
                     <h3>Total Users</h3>
-                    <p class="stat-number"><?php echo $stats['users']; ?></p>
+                    <p class="stat-number"><?php echo "{$stats['users']} ({$stats['admins']} admins)"; ?>
+                    </p>
                 </div>
                 <div class="card">
                     <h3>Total Talents</h3>

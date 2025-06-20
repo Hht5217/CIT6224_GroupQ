@@ -3,17 +3,20 @@ session_start();
 require_once '../config/database.php';
 include '../includes/timeout.php';
 
-// 检查管理员登录状态
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../login.php');
+// Check if user is logged in and is admin
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+} elseif ($_SESSION['role'] !== 'admin') {
+    header("Location: ../index.php");
     exit();
 }
 
-// 处理删除资源
+// For deleting resource
 if (isset($_POST['delete_resource'])) {
     $resource_id = $_POST['resource_id'];
 
-    // 获取资源信息
+    // Get file path
     $stmt = $conn->prepare("SELECT file_path FROM resources WHERE id = ?");
     $stmt->bind_param("i", $resource_id);
     $stmt->execute();
@@ -21,12 +24,11 @@ if (isset($_POST['delete_resource'])) {
     $resource = $result->fetch_assoc();
 
     if ($resource) {
-        // 删除文件
+        // Delete the file
         if (file_exists($resource['file_path'])) {
             unlink($resource['file_path']);
         }
 
-        // 删除数据库记录
         $stmt = $conn->prepare("DELETE FROM resources WHERE id = ?");
         $stmt->bind_param("i", $resource_id);
         $stmt->execute();
@@ -36,7 +38,7 @@ if (isset($_POST['delete_resource'])) {
     }
 }
 
-// 获取所有资源
+// Get all resources
 $sql = "SELECT r.*, u.username 
         FROM resources r 
         LEFT JOIN users u ON r.user_id = u.id 
