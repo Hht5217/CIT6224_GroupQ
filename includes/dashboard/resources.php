@@ -3,11 +3,74 @@
 
 // Handle resource deletion
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete_resource') {
-    if (deleteResource($conn, $_POST['resource_id'], $user_id)) {
-        header("Location: user-dashboard.php?page=resources");
-        exit();
+    $resource_id = isset($_POST['resource_id']) ? (int) $_POST['resource_id'] : 0;
+    $stmt = $conn->prepare("SELECT file_path, user_id FROM resources WHERE id = ?");
+    $stmt->bind_param("i", $resource_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $resource = $result->fetch_assoc();
+    $stmt->close();
+
+    if ($resource && $resource['user_id'] == $user_id) {
+        if (!empty($resource['file_path']) && file_exists($resource['file_path'])) {
+            unlink($resource['file_path']);
+        }
+        $stmt = $conn->prepare("DELETE FROM resources WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("ii", $resource_id, $user_id);
+        if ($stmt->execute()) {
+            $success = "Resource deleted successfully.";
+        } else {
+            $error = "Error deleting resource.";
+        }
+        $stmt->close();
+    } else {
+        $error = "You do not have permission to delete this resource.";
     }
+    header("Location: user-dashboard.php?page=resources");
+    exit();
 }
+
+// Handle downloadable status update
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_downloadable') {
+    $resource_id = isset($_POST['resource_id']) ? (int) $_POST['resource_id'] : 0;
+    $is_downloadable = isset($_POST['is_downloadable']) ? 1 : 0;
+
+    $stmt = $conn->prepare("SELECT user_id FROM resources WHERE id = ?");
+    $stmt->bind_param("i", $resource_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $resource = $result->fetch_assoc();
+    $stmt->close();
+
+    if ($resource && $resource['user_id'] == $user_id) {
+        $stmt = $conn->prepare("UPDATE resources SET is_downloadable = ? WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("iii", $is_downloadable, $resource_id, $user_id);
+        if ($stmt->execute()) {
+            $success = "Downloadable status updated successfully.";
+        } else {
+            $error = "Error updating downloadable status.";
+        }
+        $stmt->close();
+    } else {
+        $error = "You do not have permission to update this resource.";
+    }
+    header("Location: user-dashboard.php?page=resources");
+    exit();
+}
+
+// Fetch user's resources
+$sql = "SELECT id, title, file_type, file_size, download_count, created_at, description, is_downloadable
+        FROM resources WHERE user_id = ? ORDER BY created_at DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$resources = [];
+while ($row = $result->fetch_assoc()) {
+    $resources[] = $row;
+}
+$stmt->close();
+
 ?>
 
 <div class="dashboard-card">
@@ -65,6 +128,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         <?php endif; ?>
                     </div>
                     <div class="resource-actions">
+                        <form method="POST">
+                            <input type="hidden" name="action" value="update_downloadable">
+                            <input type="hidden" name="resource_id" value="<?php echo $resource['id']; ?>">
+                            <label>
+                                <input type="checkbox" name="is_downloadable" value="1" <?php echo $resource['is_downloadable'] ? 'checked' : ''; ?> onchange="this.form.submit()" style="margin-left: -10%">
+                                Make downloadable
+                            </label>
+                        </form>
                         <a href="download-resource.php?id=<?php echo $resource['id']; ?>" class="btn btn-sm btn-primary">
                             <i class="fas fa-download"></i> Download
                         </a>

@@ -321,10 +321,10 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                             <span><i class="fas fa-heart"></i> <?php echo $favorites_count; ?> Favorites</span>
                         </div>
                         <p>By: <?php echo htmlspecialchars($talent['full_name']); ?></p>
-                        <a href="view-user.php?id=<?php echo $talent['user_id']; ?>" class="btn btn-primary">
+                        <a href="view-profile.php?id=<?php echo $talent['user_id']; ?>" class="btn btn-primary">
                             <i class="fas fa-user"></i> View Profile
                         </a>
-                        <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php if (!empty($_SESSION['user_id'])): ?>
                             <button
                                 class="btn <?php echo $is_favorited ? 'btn-secondary' : 'btn-primary'; ?> toggle-favorite"
                                 data-talent-id="<?php echo $talent_id; ?>"
@@ -353,7 +353,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                         <div class="section-content">
                             <?php if ($talent['media_path'] === 'deleted'): ?>
                                 <p class="alert alert-warning">The original file has been deleted.</p>
-                                <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
+                                <?php if (!empty($_SESSION['user_id']) && $talent['user_id'] == $_SESSION['user_id']): ?>
                                     <button class="btn btn-primary" onclick="showUploadForm()">
                                         <i class="fas fa-upload"></i> Upload New File
                                     </button>
@@ -400,7 +400,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                             <i class="fas fa-download"></i> Download File
                                         </a>
                                     <?php endif; ?>
-                                    <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
+                                    <?php if (!empty($_SESSION['user_id']) && $talent['user_id'] == $_SESSION['user_id']): ?>
                                         <button class="btn btn-primary" onclick="showUploadForm()">
                                             <i class="fas fa-upload"></i> Replace File
                                         </button>
@@ -428,7 +428,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
-                            <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
+                            <?php if (!empty($_SESSION['user_id']) && $talent['user_id'] == $_SESSION['user_id']): ?>
                                 <form method="POST" class="downloadable-form">
                                     <input type="hidden" name="action" value="update_downloadable">
                                     <label>
@@ -453,7 +453,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                     <div class="comments-section" id="comments-section">
                         <h2><i class="fas fa-comments"></i> Comments (<?php echo count($comments); ?>)</h2>
                         <div class="section-content">
-                            <?php if (isset($_SESSION['user_id'])): ?>
+                            <?php if (!empty($_SESSION['user_id'])): ?>
                                 <form method="POST" class="comment-form">
                                     <div class="form-group">
                                         <textarea name="comment" placeholder="Write a comment..." required></textarea>
@@ -487,7 +487,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                                             class="timestamp"><?php echo date('M d, Y H:i', strtotime($comment['created_at'])); ?></span>
                                                     </div>
                                                 </div>
-                                                <?php if (isset($_SESSION['user_id'])): ?>
+                                                <?php if (!empty($_SESSION['user_id'])): ?>
                                                     <div class="comment-actions">
                                                         <button class="reply-btn"
                                                             onclick="showReplyForm(<?php echo $comment['id']; ?>)">
@@ -546,7 +546,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                                                         class="timestamp"><?php echo date('M d, Y H:i', strtotime($reply['created_at'])); ?></span>
                                                                 </div>
                                                             </div>
-                                                            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $reply['user_id']): ?>
+                                                            <?php if (!empty($_SESSION['user_id']) && $_SESSION['user_id'] == $reply['user_id']): ?>
                                                                 <form action="delete-comment.php" method="POST" style="display:inline;">
                                                                     <input type="hidden" name="comment_id"
                                                                         value="<?php echo $reply['id']; ?>">

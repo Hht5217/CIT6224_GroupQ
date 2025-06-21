@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require_once 'config/database.php';
 require_once 'includes/file-upload-delete.php';
@@ -53,18 +54,16 @@ $stmt->execute();
 $cart_items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Get user's talents
-$sql = "SELECT * FROM talents WHERE user_id = ? ORDER BY created_at DESC";
-$stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
-mysqli_stmt_execute($stmt);
-$talents = mysqli_stmt_get_result($stmt);
+$stmt = $conn->prepare("SELECT * FROM talents WHERE user_id = ? ORDER BY created_at DESC");
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$talents = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Get user's resources
-$sql = "SELECT * FROM resources WHERE user_id = ? ORDER BY created_at DESC";
-$stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
-mysqli_stmt_execute($stmt);
-$resources = mysqli_stmt_get_result($stmt);
+$stmt = $conn->prepare("SELECT * FROM resources WHERE user_id = ? ORDER BY created_at DESC");
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$resources = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Get user's favorites
 $sql = "SELECT f.talent_id, t.title, t.category, u.full_name
@@ -100,6 +99,21 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         $comments[] = $row;
     }
 }
+
+// Get user's feedback
+$sql = "SELECT id, subject, message, reply, status, created_at 
+        FROM feedback 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC";
+$feedback = [];
+if ($stmt = mysqli_prepare($conn, $sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    while ($row = mysqli_fetch_assoc($result)) {
+        $feedback[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -133,7 +147,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
 
                 <nav class="dashboard-nav">
                     <a href="?page=overview" class="<?php echo $current_page == 'overview' ? 'active' : ''; ?>">
-                        <i class="fas fa-home"></i> Overview
+                        <i class="fas fa-vcard"></i> Overview
                     </a>
                     <a href="?page=profile" class="<?php echo $current_page == 'profile' ? 'active' : ''; ?>">
                         <i class="fas fa-user"></i> My Profile
@@ -149,6 +163,9 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                     </a>
                     <a href="?page=comments" class="<?php echo $current_page == 'comments' ? 'active' : ''; ?>">
                         <i class="fas fa-comments"></i> My Comments
+                    </a>
+                    <a href="?page=feedback" class="<?php echo $current_page == 'feedback' ? 'active' : ''; ?>">
+                        <i class="fas fa-comment-alt"></i> My Feedback
                     </a>
                     <a href="?page=products" class="<?php echo $current_page == 'products' ? 'active' : ''; ?>">
                         <i class="fas fa-box"></i> My Products
@@ -176,5 +193,6 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         <script src="assets/js/script.js"></script>
         <?php include 'includes/footer-inc.php'; ?>
     </body>
+    <?php ob_end_flush(); ?>
 
 </html>

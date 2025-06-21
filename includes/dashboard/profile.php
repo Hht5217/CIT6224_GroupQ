@@ -1,4 +1,29 @@
 <?php
+
+include 'includes/timeout.php';
+
+// Ensure user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Set custom max size (5MB)
+$maxSizeMB = 5;
+
+// Retrieve success/error messages from session
+$success = isset($_SESSION['success']) ? $_SESSION['success'] : '';
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+unset($_SESSION['success'], $_SESSION['error']);
+
+// Get user information
+$sql = "SELECT full_name, username, email FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
 // Get user profile information
 $sql = "SELECT p.* FROM profiles p WHERE p.user_id = ?";
 $profile = [];
@@ -9,50 +34,40 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
     if ($row = mysqli_fetch_assoc($result)) {
         $profile = $row;
     }
+    mysqli_stmt_close($stmt);
 }
 
 // Handle profile update
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_profile') {
-    $full_name = $_POST['full_name'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $bio = $_POST['bio'];
+    $full_name = trim($_POST['full_name']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $bio = trim($_POST['bio']);
+
+    // Validate phone format (numbers and hyphens only)
+    if (!empty($phone) && !preg_match('/^[0-9-]+$/', $phone)) {
+        $_SESSION['error'] = "Phone number can only contain numbers and hyphens.";
+        header("Location: user-dashboard.php?page=profile");
+        exit();
+    }
 
     // Handle profile picture upload
-    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
-        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-        $max_size = 5 * 1024 * 1024; // 5MB
-        $filename = $_FILES['profile_picture']['name'];
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $result = uploadFile($_FILES['file'], 'assets/images/profiles/', $allowed_types, $maxSizeMB);
 
-        // Validate file type
-        if (!in_array($ext, $allowed)) {
-            $error = "Invalid file type. Allowed types: " . implode(', ', $allowed);
-        }
-        // Validate file size
-        elseif ($_FILES['profile_picture']['size'] > $max_size) {
-            $error = "File is too large. Maximum size is 5MB.";
+        if ($result['error']) {
+            $_SESSION['error'] = $result['error'];
+            header("Location: user-dashboard.php?page=profile");
+            exit();
         } else {
-            // Make upload directory string
-            $upload_dir = 'assets/images/profiles/';
-            if (!file_exists($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
-
-            // Generate a safe file name
-            $new_filename = 'profile_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-            $upload_path = $upload_dir . $new_filename;
-
-            // Validate image size
-            $image_info = getimagesize($_FILES['profile_picture']['tmp_name']);
-            if ($image_info === false) {
-                $error = "Invalid image file.";
-            } else {
+            // Resize image if needed
+            $image_info = getimagesize($result['filepath']);
+            if ($image_info) {
                 $max_width = 1000;
                 $max_height = 1000;
                 if ($image_info[0] > $max_width || $image_info[1] > $max_height) {
-                    // Create temp image
-                    $source_image = imagecreatefromstring(file_get_contents($_FILES['profile_picture']['tmp_name']));
+                    $source_image = imagecreatefromstring(file_get_contents($result['filepath']));
                     $new_image = imagecreatetruecolor($max_width, $max_height);
 
                     // Maintain aspect ratio
@@ -74,65 +89,67 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         $image_info[1]
                     );
 
-                    // Save the resized image
+                    // Save resized image
+                    $ext = strtolower(pathinfo($result['filepath'], PATHINFO_EXTENSION));
                     switch ($ext) {
                         case 'jpg':
                         case 'jpeg':
-                            imagejpeg($new_image, $upload_path, 90);
+                            imagejpeg($new_image, $result['filepath'], 90);
                             break;
                         case 'png':
-                            imagepng($new_image, $upload_path, 9);
+                            imagepng($new_image, $result['filepath'], 9);
                             break;
                         case 'gif':
-                            imagegif($new_image, $upload_path);
+                            imagegif($new_image, $result['filepath']);
                             break;
                     }
 
                     // Release memory
                     imagedestroy($source_image);
                     imagedestroy($new_image);
-                } else {
-                    // Move the file directly
-                    if (!move_uploaded_file($_FILES['profile_picture']['tmp_name'], $upload_path)) {
-                        $error = "Failed to upload image.";
-                    }
                 }
 
-                if (!isset($error)) {
-                    // Delete old profile picture
-                    if (!empty($profile['profile_picture']) && file_exists($profile['profile_picture'])) {
-                        unlink($profile['profile_picture']);
-                    }
-
-                    // Update profile picture in database
-                    $stmt = $conn->prepare("UPDATE profiles SET profile_picture = ? WHERE user_id = ?");
-                    $stmt->bind_param("si", $upload_path, $_SESSION['user_id']);
-                    $stmt->execute();
+                // Delete old profile picture
+                if (!empty($profile['profile_picture']) && file_exists($profile['profile_picture'])) {
+                    unlink($profile['profile_picture']);
                 }
+
+                // Update profile picture in database
+                $stmt = $conn->prepare("UPDATE profiles SET profile_picture = ? WHERE user_id = ?");
+                $stmt->bind_param("si", $result['filepath'], $_SESSION['user_id']);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                $_SESSION['error'] = "Invalid image file.";
+                if (file_exists($result['filepath'])) {
+                    unlink($result['filepath']);
+                }
+                header("Location: user-dashboard.php?page=profile");
+                exit();
             }
         }
     }
 
-    if (!isset($error)) {
-        // Update user information
-        $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE id = ?");
-        $stmt->bind_param("ssi", $full_name, $email, $_SESSION['user_id']);
-        $stmt->execute();
+    // Update user information
+    $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE id = ?");
+    $stmt->bind_param("ssi", $full_name, $email, $_SESSION['user_id']);
+    $stmt->execute();
+    $stmt->close();
 
-        // Update or insert profile information
-        if (empty($profile)) {
-            $stmt = $conn->prepare("INSERT INTO profiles (user_id, phone, bio) VALUES (?, ?, ?)");
-            $stmt->bind_param("iss", $_SESSION['user_id'], $phone, $bio);
-        } else {
-            $stmt = $conn->prepare("UPDATE profiles SET phone = ?, bio = ? WHERE user_id = ?");
-            $stmt->bind_param("ssi", $phone, $bio, $_SESSION['user_id']);
-        }
-        $stmt->execute();
-
-        // Refresh the page
-        header("Location: user-dashboard.php?page=profile");
-        exit();
+    // Update or insert profile information
+    if (empty($profile)) {
+        $stmt = $conn->prepare("INSERT INTO profiles (user_id, phone, bio) VALUES (?, ?, ?)");
+        $stmt->bind_param("iss", $_SESSION['user_id'], $phone, $bio);
+    } else {
+        $stmt = $conn->prepare("UPDATE profiles SET phone = ?, bio = ? WHERE user_id = ?");
+        $stmt->bind_param("ssi", $phone, $bio, $_SESSION['user_id']);
     }
+    $stmt->execute();
+    $stmt->close();
+
+    $_SESSION['success'] = "Profile updated successfully.";
+    header("Location: user-dashboard.php?page=profile");
+    exit();
 }
 ?>
 
@@ -141,22 +158,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 <div class="dashboard-card">
     <h2>My Profile</h2>
 
-    <?php if (isset($error)): ?>
+    <?php if (!empty($error)): ?>
         <div class="alert alert-danger">
             <?php echo htmlspecialchars($error); ?>
         </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" class="profile-form">
+    <?php if (!empty($success)): ?>
+        <div class="alert alert-success">
+            <?php echo htmlspecialchars($success); ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" enctype="multipart/form-data" class="profile-form" id="profileForm"
+        onsubmit="return validateFileSize();">
         <input type="hidden" name="action" value="update_profile">
 
         <div class="form-group">
             <div class="profile-picture-upload">
                 <img src="<?php echo $profile['profile_picture'] ?? 'assets/images/default-avatar.png'; ?>"
                     alt="Profile Picture" id="preview">
-                <input type="file" name="profile_picture" id="profile_picture" accept="image/jpeg,image/png,image/gif"
-                    onchange="previewImage(this)">
-                <small class="form-text text-muted">Maximum file size: 5MB. Allowed formats: JPG, PNG, GIF</small>
+                <input type="file" name="file" id="file" accept="image/jpeg,image/png,image/gif"
+                    data-max-size="<?php echo $maxSizeMB; ?>" onchange="previewImage(this)">
+                <small class="form-text text-muted">Supported types: JPG, PNG, GIF. Max size:
+                    <?php echo number_format($maxSizeMB, 2); ?>MB</small>
             </div>
         </div>
 
@@ -183,7 +208,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             <div class="form-group">
                 <label for="phone">Phone</label>
                 <input type="tel" name="phone" id="phone"
-                    value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>">
+                    value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>" pattern="[0-9-]*"
+                    title="Phone number can only contain numbers and hyphens (e.g., 123-456-7890)">
             </div>
         </div>
 
@@ -198,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     </form>
 </div>
 
+<script src="assets/js/validateFileSize.js"></script>
 <script>
     function previewImage(input) {
         if (input.files && input.files[0]) {
@@ -208,4 +235,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             reader.readAsDataURL(input.files[0]);
         }
     }
+</script>
+<script>
+    // Track form changes
+    let formIsDirty = false;
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input, textarea');
+
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            formIsDirty = true;
+        });
+        input.addEventListener('input', () => {
+            formIsDirty = true;
+        });
+    });
+
+    // Clear dirty flag on form submission
+    form.addEventListener('submit', () => {
+        formIsDirty = false;
+    });
+
+    // Prompt on navigation if form is dirty
+    window.addEventListener('beforeunload', (event) => {
+        if (formIsDirty) {
+            event.preventDefault();
+            event.returnValue = 'You have unsaved changes. Are you sure you want to leave without saving?';
+        }
+    });
 </script>

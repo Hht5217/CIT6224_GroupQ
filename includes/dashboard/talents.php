@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 <label for="category">Category</label>
                 <select id="category" name="category" class="form-control" required>
                     <option value="">Select a category</option>
-                    <?php renderTalentCategoryOptions($selectedCategory ?? ''); ?>
+                    <?php showTalentCategoryOptions($selectedCategory ?? ''); ?>
                 </select>
             </div>
 
@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
     <?php if (empty($talents)): ?>
         <div class="empty-state">
-            <i class="fas fa-file"></i>
+            <i class="fas fa-star"></i>
             <p>No talents found. Start by uploading your first talent!</p>
         </div>
     <?php else: ?>

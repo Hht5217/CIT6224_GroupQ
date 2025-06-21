@@ -2,6 +2,7 @@
 // session_start();
 // require_once 'config/database.php';
 // require_once 'includes/file-upload-delete.php';
+include_once __DIR__ . '/../product-categories.php';
 include 'includes/timeout.php';
 
 // Set custom max size (5MB)
@@ -22,26 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             $stmt->execute();
             break;
 
-        case 'delete_product':
-            $product_id = (int) $_POST['product_id'];
-
-            // Get product info before deletion
-            $stmt = $conn->prepare("SELECT image_url FROM products WHERE id = ? AND user_id = ?");
-            $stmt->bind_param("ii", $product_id, $user_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $product = $result->fetch_assoc();
-
-            if ($product && $product['image_url'] && file_exists($product['image_url'])) {
-                unlink($product['image_url']);
-            }
-
-            // Delete from database
-            $stmt = $conn->prepare("DELETE FROM products WHERE id = ? AND user_id = ?");
-            $stmt->bind_param("ii", $product_id, $user_id);
-            $stmt->execute();
-            break;
-
         case 'add_product':
             $title = trim($_POST['title']);
             $description = trim($_POST['description']);
@@ -52,9 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                 $error = "All fields are required and price must be positive";
             } elseif (!isset($_FILES['image']) || $_FILES['image']['error'] == UPLOAD_ERR_NO_FILE) {
                 $error = "Please select an image to upload";
+            } elseif (!array_key_exists($category, $product_categories)) {
+                $error = "Invalid category selected";
             } else {
                 $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-                $result = uploadFile($_FILES['image'], 'uploads/products/', $allowed_types, $maxSizeMB);
+                $result = uploadFile($_FILES['image'], 'Uploads/products/', $allowed_types, $maxSizeMB);
                 if ($result['error']) {
                     $error = $result['error'];
                 } else {
@@ -118,7 +101,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
             <div class="form-group">
                 <label for="category">Category</label>
-                <input type="text" id="category" name="category" class="form-control" required>
+                <select id="category" name="category" class="form-control" required>
+                    <option value="">Select a category</option>
+                    <?php showProductCategoryOptions(''); ?>
+                </select>
             </div>
 
             <div class="form-group">
@@ -158,7 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                     <div class="product-info">
                         <h3><?php echo htmlspecialchars($product['title']); ?></h3>
                         <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
-                        <p class="category"><?php echo htmlspecialchars($product['category']); ?></p>
+                        <p class="category">
+                            <?php echo isset($product_categories[$product['category']]) ? htmlspecialchars($product_categories[$product['category']]) : 'Not specified'; ?>
+                        </p>
                         <div class="product-meta">
                             <span class="status-badge <?php echo $product['status']; ?>">
                                 <?php echo ucfirst($product['status']); ?>
@@ -170,18 +158,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                         <form method="POST" class="status-form">
                             <input type="hidden" name="action" value="update_status">
                             <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                            <select name="status" onchange="this.form.submit()"
-                                class="status-select <?php echo $product['status']; ?>">
+                            <select name="status" class="status-select <?php echo $product['status']; ?>">
                                 <option value="active" <?php echo $product['status'] == 'active' ? 'selected' : ''; ?>>Active
                                 </option>
                                 <option value="inactive" <?php echo $product['status'] == 'inactive' ? 'selected' : ''; ?>>
-                                    Inactive</option>
-                                <option value="sold" <?php echo $product['status'] == 'sold' ? 'selected' : ''; ?>>Sold</option>
+                                    Inactive
+                                </option>
+                                <option value="out of stock" <?php echo $product['status'] == 'out of stock' ? 'selected' : ''; ?>>Out of Stock
+                                </option>
                             </select>
+                            <button type="submit" class="btn btn-sm btn-primary">Save Change</button>
                         </form>
-                        <button onclick="deleteProduct(<?php echo $product['id']; ?>)" class="btn btn-sm btn-danger">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -197,18 +184,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
     function hideAddForm() {
         document.getElementById('addForm').style.display = 'none';
-    }
-
-    function deleteProduct(productId) {
-        if (confirm('Are you sure you want to delete this product?')) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.innerHTML = `
-            <input type="hidden" name="action" value="delete_product">
-            <input type="hidden" name="product_id" value="${productId}">
-        `;
-            document.body.appendChild(form);
-            form.submit();
-        }
     }
 </script>

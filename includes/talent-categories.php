@@ -9,7 +9,7 @@ $talent_categories = [
     'other' => 'Other'
 ];
 
-function renderTalentCategoryOptions($selected = '')
+function showTalentCategoryOptions($selected = '')
 {
     global $talent_categories;
     foreach ($talent_categories as $key => $label) {

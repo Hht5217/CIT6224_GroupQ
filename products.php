@@ -1,18 +1,20 @@
 <?php
 session_start();
 require_once 'config/database.php';
+include_once 'includes/product-categories.php';
 include 'includes/timeout.php';
 
 // Get search parameters
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $category = isset($_GET['category']) ? trim($_GET['category']) : '';
+$status = isset($_GET['status']) ? trim($_GET['status']) : '';
 $sort = isset($_GET['sort']) ? trim($_GET['sort']) : 'newest';
 
 // Build query
 $sql = "SELECT p.*, u.username as seller_name 
         FROM products p 
         JOIN users u ON p.user_id = u.id 
-        WHERE p.status = 'active'";
+        WHERE p.status IN ('active', 'out of stock')";
 
 $params = [];
 $types = "";
@@ -28,6 +30,12 @@ if (!empty($search)) {
 if (!empty($category)) {
     $sql .= " AND p.category = ?";
     $params[] = $category;
+    $types .= "s";
+}
+
+if (!empty($status)) {
+    $sql .= " AND p.status = ?";
+    $params[] = $status === 'in_stock' ? 'active' : 'out of stock';
     $types .= "s";
 }
 
@@ -59,14 +67,6 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         $products[] = $row;
     }
 }
-
-// Get categories for filter
-$sql = "SELECT DISTINCT category FROM products WHERE status = 'active' ORDER BY category";
-$result = mysqli_query($conn, $sql);
-$categories = [];
-while ($row = mysqli_fetch_assoc($result)) {
-    $categories[] = $row['category'];
-}
 ?>
 
 <!DOCTYPE html>
@@ -94,11 +94,15 @@ while ($row = mysqli_fetch_assoc($result)) {
 
                         <select name="category" class="form-control">
                             <option value="">All Categories</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?php echo $cat; ?>" <?php echo $category === $cat ? 'selected' : ''; ?>>
-                                    <?php echo $cat; ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <?php showProductCategoryOptions($category); ?>
+                        </select>
+
+                        <select name="status" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="in_stock" <?php echo $status === 'in_stock' ? 'selected' : ''; ?>>In Stock
+                            </option>
+                            <option value="out_of_stock" <?php echo $status === 'out_of_stock' ? 'selected' : ''; ?>>Out
+                                of Stock</option>
                         </select>
 
                         <select name="sort" class="form-control">
@@ -151,15 +155,20 @@ while ($row = mysqli_fetch_assoc($result)) {
                                 <h3><?php echo $product['title']; ?></h3>
                                 <p class="seller">Seller: <?php echo $product['seller_name']; ?></p>
                                 <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
+                                <p class="category">
+                                    <?php echo isset($product_categories[$product['category']]) ? htmlspecialchars($product_categories[$product['category']]) : 'Not specified'; ?>
+                                </p>
                                 <p class="description"><?php echo substr($product['description'], 0, 100) . '...'; ?></p>
 
-                                <?php if (isset($_SESSION['user_id'])): ?>
+                                <?php if (isset($_SESSION['user_id']) && $product['status'] === 'active'): ?>
                                     <form action="add-to-cart.php" method="post" class="add-to-cart-form">
                                         <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                         <input type="number" name="quantity" value="1" min="1" class="form-control quantity-input">
                                         <button type="submit" class="btn btn-primary">Add to Cart</button>
                                     </form>
-                                <?php else: ?>
+                                <?php elseif (isset($_SESSION['user_id']) && $product['status'] !== 'active'): ?>
+                                    <p class="out-of-stock">Out of Stock</p>
+                                <?php elseif (!isset($_SESSION['user_id'])): ?>
                                     <a href="login.php" class="btn btn-secondary">Login to Purchase</a>
                                 <?php endif; ?>
                             </div>

@@ -69,7 +69,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                         <select name="category" class="form-control">
                             <option value="">All Categories</option>
                             <?php
-                            renderTalentCategoryOptions($selectedCategory ?? '');
+                            showTalentCategoryOptions($selectedCategory ?? '');
                             ?>
                         </select>
                     </div>

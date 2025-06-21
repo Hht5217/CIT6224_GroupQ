@@ -63,8 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 $cart_items[] = $item;
                             }
 
-                            // Create order
-                            $sql = "INSERT INTO orders (user_id, total_amount) VALUES (?, ?)";
+                            // Create order with payment_status = 'paid'
+                            $sql = "INSERT INTO orders (user_id, total_amount, payment_status) VALUES (?, ?, 'paid')";
                             if ($stmt = mysqli_prepare($conn, $sql)) {
                                 mysqli_stmt_bind_param($stmt, "id", $user_id, $total_amount);
                                 mysqli_stmt_execute($stmt);
@@ -160,7 +160,11 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                 <?php if (empty($cart_items)): ?>
                     <div class="empty-cart">
                         <p>Your cart is empty</p>
-                        <a href="products.php" class="btn btn-primary">Browse Products</a>
+                        <div class="cart-actions">
+                            <a href="products.php" class="btn btn-primary">Browse Products</a>
+                            <a href="user-dashboard.php?page=orders&tab=purchases" class="btn btn-secondary">View My
+                                Orders</a>
+                        </div>
                     </div>
                 <?php else: ?>
                     <div class="cart-items">
@@ -205,10 +209,14 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                             <div class="total">
                                 <h3>Total Amount: $<?php echo number_format($total, 2); ?></h3>
                             </div>
-                            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                                <input type="hidden" name="action" value="checkout">
-                                <button type="submit" class="btn btn-primary">Proceed to Checkout</button>
-                            </form>
+                            <div>
+                                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                                    <input type="hidden" name="action" value="checkout">
+                                    <button type="submit" class="btn btn-primary">Proceed to Checkout</button>
+                                </form>
+                                <a href="user-dashboard.php?page=orders&tab=purchases" class="btn btn-secondary">View My
+                                    Orders</a>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>

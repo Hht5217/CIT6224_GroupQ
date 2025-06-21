@@ -38,7 +38,7 @@ body {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
+    /* display: flex; */
     justify-content: center;
     flex-wrap: wrap;
     gap: 1rem;
@@ -61,6 +61,43 @@ body {
 }
 
 .nav a.active {
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+.admin-nav {
+    background-color: #333;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.admin-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.admin-nav li {
+    margin: 0;
+}
+
+.admin-nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.admin-nav a:hover {
+    background-color: #444;
+}
+
+.admin-nav a.active {
     background-color: #4CAF50;
     color: #fff;
 }
@@ -1348,4 +1385,44 @@ select.form-control {
     .dashboard-content {
         padding: 1rem;
     }
+}
+
+.nav-list {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-list li {
+    position: relative;
+}
+
+.nav-list li a,
+.dropdown-toggle {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    /* border-radius: 4px; */
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.nav-list li a i,
+.dropdown-toggle i {
+    margin-right: 0.5rem;
+}
+
+.nav-list li a:hover,
+.dropdown-toggle:hover,
+.nav-list li a.active {
+    background-color: #444;
+}
+
+i {
+    min-width: 18px;
+    text-align: center;
 }
