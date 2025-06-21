@@ -56,73 +56,69 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         <?php include 'includes/navbar.php'; ?>
 
         <div class="container">
-            <div class="card">
-                <h2>Talent Catalogue</h2>
 
-                <!-- Search and Filter Form -->
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get" class="search-form">
-                    <div class="form-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search talents..."
-                            value="<?php echo htmlspecialchars($search); ?>">
-                    </div>
-                    <div class="form-group">
-                        <select name="category" class="form-control">
-                            <option value="">All Categories</option>
-                            <?php
-                            showTalentCategoryOptions($selectedCategory ?? '');
-                            ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" class="btn" value="Search">
-                    </div>
-                </form>
+            <h2>Talent Catalogue</h2>
 
-                <?php
-                if (!isset($result)) {
-                    echo "<p style='color:red;'>Query did not run or \$result is not set.</p>";
-                } elseif (mysqli_num_rows($result) == 0) {
-                    echo "<p>No talents found.</p>";
-                }
-                ?>
-                <div class="grid">
-                    <?php while ($talent = mysqli_fetch_assoc($result)): ?>
-                        <div class="card">
-                            <div class="talent-icon">
-                                <?php
-                                $icon = 'fa-file';
-                                if (!empty($talent['media_path'])) {
-                                    $ext = strtolower(pathinfo($talent['media_path'], PATHINFO_EXTENSION));
-                                    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                        $icon = 'fa-file-image';
-                                    } elseif (in_array($ext, ['mp4', 'webm', 'ogg'])) {
-                                        $icon = 'fa-file-video';
-                                    } elseif (in_array($ext, ['mp3', 'wav', 'ogg'])) {
-                                        $icon = 'fa-file-audio';
-                                    } elseif (in_array($ext, ['txt', 'py', 'js', 'html', 'css', 'csv'])) {
-                                        $icon = 'fa-file-code';
-                                    } elseif (in_array($ext, ['pdf', 'zip', 'json'])) {
-                                        $icon = 'fa-file-alt';
-                                    }
-                                }
-                                ?>
-                                <i class="fas <?php echo $icon; ?>" style="font-size: 3rem; color: #555;"></i>
-                            </div>
-                            <h3><?php echo htmlspecialchars($talent['title']); ?></h3>
-                            <p><?php echo htmlspecialchars($talent['description'] ?? ''); ?></p>
-                            <div class="talent-meta">
-                                <p>Category: <?php
-                                $cat = $talent['category'] ?? '';
-                                echo isset($talent_categories[$cat]) ? $talent_categories[$cat] : 'Not specified';
-                                ?></p>
-                                <p>By: <?php echo htmlspecialchars($talent['full_name']); ?></p>
-                                <a href="talent-details.php?id=<?php echo $talent['id']; ?>" class="btn btn-primary">View
-                                    Details</a>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
+            <!-- Search and Filter Form -->
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get" class="search-form">
+                <div class="search-filters">
+                    <input type="text" name="search" class="form-control" placeholder="Search talents..."
+                        value="<?php echo htmlspecialchars($search); ?>">
+                    <select name="category" class="form-control">
+                        <option value="">All Categories</option>
+                        <?php
+                        showTalentCategoryOptions($category);
+                        ?>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Search</button>
                 </div>
+            </form>
+
+            <?php
+            if (!isset($result)) {
+                echo "<p style='color:red;'>Query did not run or \$result is not set.</p>";
+            } elseif (mysqli_num_rows($result) == 0) {
+                echo "<div class=\"no-talents\"><p>No talents found.</p></div>";
+            }
+            ?>
+            <div class="grid">
+                <?php while ($talent = mysqli_fetch_assoc($result)): ?>
+                    <div class="card">
+                        <div class="talent-icon">
+                            <?php
+                            $icon = 'fa-file';
+                            if (!empty($talent['media_path'])) {
+                                $ext = strtolower(pathinfo($talent['media_path'], PATHINFO_EXTENSION));
+                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                    $icon = 'fa-file-image';
+                                } elseif (in_array($ext, ['mp4', 'webm', 'ogg'])) {
+                                    $icon = 'fa-file-video';
+                                } elseif (in_array($ext, ['mp3', 'wav', 'ogg'])) {
+                                    $icon = 'fa-file-audio';
+                                } elseif (in_array($ext, ['txt', 'py', 'js', 'html', 'css', 'csv'])) {
+                                    $icon = 'fa-file-code';
+                                } elseif (in_array($ext, ['pdf', 'zip', 'json'])) {
+                                    $icon = 'fa-file-alt';
+                                }
+                            }
+                            ?>
+                            <i class="fas <?php echo $icon; ?>" style="font-size: 3rem; color: #555;"></i>
+                        </div>
+                        <h3><?php echo htmlspecialchars($talent['title']); ?></h3>
+                        <p><?php echo htmlspecialchars($talent['description'] ?? ''); ?></p>
+                        <div class="talent-meta">
+                            <p>Category: <?php
+                            $cat = $talent['category'] ?? '';
+                            echo isset($talent_categories[$cat]) ? $talent_categories[$cat] : 'Not specified';
+                            ?></p>
+                            <p>By: <?php echo htmlspecialchars($talent['full_name']); ?></p>
+                            <a href="talent-details.php?id=<?php echo $talent['id']; ?>" class="btn btn-primary">View
+                                Details</a>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
             </div>
+
         </div>
 
         <?php include 'includes/footer-inc.php'; ?>

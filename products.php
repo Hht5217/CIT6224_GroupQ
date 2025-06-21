@@ -77,6 +77,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Products - MMU Talent Showcase</title>
         <link rel="stylesheet" href="assets/css/style.css">
+        <link rel="stylesheet" href="assets/css/products.css">
     </head>
 
     <body>
@@ -159,8 +160,22 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                     <?php echo isset($product_categories[$product['category']]) ? htmlspecialchars($product_categories[$product['category']]) : 'Not specified'; ?>
                                 </p>
                                 <p class="description"><?php echo substr($product['description'], 0, 100) . '...'; ?></p>
-                                <p class="status"><?php echo ucfirst($product['status']); ?></p>
-                                <a href="product-details.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View
+                                <p class="status">
+                                    <?php
+                                    $status = strtolower($product['status']);
+                                    $badgeClass = 'status-badge ';
+                                    if ($status === 'active') {
+                                        $badgeClass .= 'active';
+                                    } elseif ($status === 'out of stock') {
+                                        $badgeClass .= 'out-of-stock';
+                                    } else {
+                                        $badgeClass .= 'inactive';
+                                    }
+                                    ?>
+                                    <span class="<?php echo $badgeClass; ?>">
+                                        <?php echo ucfirst($product['status']); ?>
+                                    </span>
+                                </p> <a href="product-details.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View
                                     Details</a>
                             </div>
                         </div>

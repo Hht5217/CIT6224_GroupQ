@@ -214,7 +214,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                             <div>
                                 <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                                     <input type="hidden" name="action" value="checkout">
-                                    <button type="submit" class="btn btn-primary">Proceed to Checkout</button>
+                                    <button type="submit" class="btn btn-primary checkout-btn">Proceed to Checkout</button>
                                 </form>
                                 <a href="user-dashboard.php?page=orders&tab=purchases" class="btn btn-secondary">View My
                                     Orders</a>

@@ -75,7 +75,7 @@
     min-width: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .dashboard-container {
         flex-direction: column;
         padding: 1rem;
@@ -232,7 +232,7 @@
     color: #fff;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .order-table {
         font-size: 0.9rem;
     }

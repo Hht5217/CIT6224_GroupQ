@@ -5,11 +5,19 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
     background-color: #f4f4f4;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
 
 /* Container */
 .container {
@@ -17,6 +25,7 @@ body {
     margin: auto;
     overflow: hidden;
     padding: 20px;
+    flex: 1 0 auto;
 }
 
 /* Header */
@@ -25,6 +34,16 @@ body {
     color: #fff;
     padding: 1rem;
     text-align: center;
+}
+
+/* Footer */
+.footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    position: relative;
+    flex-shrink: 0;
 }
 
 /* Navigation */
@@ -48,19 +67,56 @@ body {
     margin: 0;
 }
 
-.nav a {
-    color: #fff;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
+.nav-list li a i,
+.dropdown-toggle i {
+    margin-right: 0.5rem;
 }
 
-.nav a:hover {
+.nav-list li a:hover,
+.dropdown-toggle:hover,
+.nav-list li a.active {
     background-color: #444;
 }
 
-.nav a.active {
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background: #333;
+    min-width: 200px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    margin-top: 0.5rem;
+    left: 0;
+}
+
+.dropdown:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li a {
+    color: #fff;
+    padding: 0.75rem 1rem;
+    display: block;
+    border-radius: 0;
+    background: none;
+    transition: background 0.2s;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li a.active {
+    background: #4CAF50;
+    color: #fff;
+}
+
+/* Optional: visually indicate dropdown toggle is open (on hover) */
+.dropdown:hover>.dropdown-toggle,
+.dropdown:focus-within>.dropdown-toggle {
+    background: #444;
+}
+
+.nav-list li a.active,
+.nav-list>li>a.active {
     background-color: #4CAF50;
     color: #fff;
 }
@@ -130,18 +186,109 @@ body {
     display: block;
 }
 
-.btn {
+/* Buttons - General */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-success,
+.btn-warning {
     display: inline-block;
-    padding: 10px 20px;
-    background: #333;
-    color: #fff;
+    padding: 12px 24px;
+    min-width: 140px;
+    font-size: 16px;
+    font-weight: 500;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+/* Specific Button Colors */
+.btn {
+    background: #333;
+    color: #fff;
 }
 
 .btn:hover {
     background: #555;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-success {
+    background: #28a745;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Special button: reply */
+.btn-reply {
+    background: #6c757d;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* Cancel reply button */
+.cancel-reply-btn {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 24px;
+    background-color: #6c757d;
+}
+
+/* Button group spacing */
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.btn+.btn,
+.btn+form,
+form+.btn {
+    margin-left: 10px;
 }
 
 /* Cards */
@@ -162,7 +309,7 @@ body {
 }
 
 /* Responsive */
-@media(max-width: 768px) {
+@media(max-width: 800px) {
     .container {
         width: 95%;
     }
@@ -208,14 +355,6 @@ body {
 
 .faq-actions {
     margin-top: 10px;
-}
-
-.btn-danger {
-    background: #dc3545;
-}
-
-.btn-danger:hover {
-    background: #c82333;
 }
 
 /* Announcements Styles */
@@ -322,6 +461,26 @@ body {
 
 .feedback-actions .btn {
     margin-left: 10px;
+}
+
+.feedback-reply {
+    background: #f9f9f9;
+    padding: 15px;
+    margin: 10px 0;
+    border-left: 3px solid #4CAF50;
+    border-radius: 4px;
+}
+
+.feedback-reply strong {
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.feedback-reply p {
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
 }
 
 /* Question List Styles */
@@ -459,6 +618,19 @@ body {
     line-height: 1.6;
 }
 
+.no-talents {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.no-talents p {
+    color: #666;
+    font-size: 1.2em;
+    margin: 0;
+}
+
 /* Comments Section Styles */
 .comments-section {
     margin-top: 2rem;
@@ -511,7 +683,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .talent-profile {
         flex-direction: column;
     }
@@ -582,21 +754,6 @@ body {
     background: #fff;
 }
 
-.btn-primary {
-    background: #007bff;
-    color: #fff;
-}
-
-.btn-warning {
-    background: #ffc107;
-    color: #000;
-}
-
-.btn-danger {
-    background: #dc3545;
-    color: #fff;
-}
-
 .alert {
     padding: 1rem;
     margin-bottom: 1rem;
@@ -622,7 +779,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .user-info {
         flex-direction: column;
         align-items: center;
@@ -641,15 +798,6 @@ body {
     .action-form button {
         width: 100%;
     }
-}
-
-/* Comment Reply Styles */
-.btn-reply {
-    background: #6c757d;
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
 }
 
 .reply-form {
@@ -683,12 +831,6 @@ body {
 .reply-date {
     color: #6c757d;
     font-size: 0.875rem;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: #fff;
-    margin-left: 0.5rem;
 }
 
 /* Profile Page Styles */
@@ -753,22 +895,6 @@ select.form-control {
     background-size: 1em;
 }
 
-.btn-primary {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: background-color 0.3s ease;
-}
-
-.btn-primary:hover {
-    background-color: #45a049;
-}
-
 .alert {
     padding: 15px;
     margin-bottom: 20px;
@@ -788,7 +914,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .profile-section {
         padding: 15px;
     }
@@ -797,71 +923,6 @@ select.form-control {
         font-size: 16px;
         /* Better for mobile input */
     }
-
-    .btn-primary {
-        width: 100%;
-    }
-}
-
-/* Shopping Cart Styles */
-.cart-items {
-    margin-top: 20px;
-}
-
-.cart-item {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    background: #fff;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.item-image {
-    width: 120px;
-    height: 120px;
-    margin-right: 20px;
-}
-
-.item-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.item-details {
-    flex: 1;
-}
-
-.item-details h3 {
-    margin: 0 0 10px 0;
-    color: #333;
-}
-
-.seller {
-    color: #666;
-    font-size: 0.9em;
-    margin-bottom: 5px;
-}
-
-.price {
-    color: #4CAF50;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.quantity-form {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.quantity-input {
-    width: 80px;
-    margin: 0 10px;
 }
 
 .item-total {
@@ -892,81 +953,8 @@ select.form-control {
     margin: 0;
 }
 
-.empty-cart {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.empty-cart p {
-    color: #666;
-    margin-bottom: 20px;
-    font-size: 1.2em;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-.cancel-reply-btn {
-    font-size: 16px;
-    font-weight: 500;
-    padding: 12px 24px;
-    background-color: #6c757d;
-}
-
 /* Responsive Design */
-@media (max-width: 768px) {
-    .cart-item {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .item-image {
-        width: 100%;
-        height: 200px;
-        margin-right: 0;
-        margin-bottom: 20px;
-    }
-
-    .item-details {
-        margin-bottom: 20px;
-    }
-
-    .quantity-form {
-        justify-content: center;
-    }
-
-    .item-total {
-        text-align: center;
-        margin-top: 10px;
-    }
-}
+@media (max-width: 800px) {}
 
 /* Products Page Styles */
 .products-header {
@@ -1073,7 +1061,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .search-filters {
         flex-direction: column;
     }
@@ -1166,7 +1154,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .welcome-section {
         padding: 2rem 1rem;
     }
@@ -1359,7 +1347,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .dashboard-container {
         flex-direction: column;
     }
@@ -1405,21 +1393,10 @@ select.form-control {
     color: #fff;
     text-decoration: none;
     padding: 0.5rem 1rem;
-    /* border-radius: 4px; */
+    border-radius: 4px;
     display: flex;
     align-items: center;
     transition: background-color 0.3s ease;
-}
-
-.nav-list li a i,
-.dropdown-toggle i {
-    margin-right: 0.5rem;
-}
-
-.nav-list li a:hover,
-.dropdown-toggle:hover,
-.nav-list li a.active {
-    background-color: #444;
 }
 
 i {

@@ -461,10 +461,10 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                     echo '<span>No preview available.</span>';
                                 }
                                 ?>
-                                <div>
+                                <div class="button-group">
                                     <?php if ($resource_is_downloadable && !empty($talent['media_path'])): ?>
                                         <a href="<?php echo htmlspecialchars($talent['media_path']); ?>" download
-                                            class="btn btn-success" style="margin-top:1rem;display:inline-block;">
+                                            class="btn btn-primary" style="margin-top:1rem;display:inline-block;">
                                             <i class="fas fa-download"></i> Download File
                                         </a>
                                     <?php endif; ?>

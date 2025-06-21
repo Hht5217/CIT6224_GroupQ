@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         <title><?php echo htmlspecialchars($product['title']); ?> - Product Details</title>
         <link rel="stylesheet" href="assets/css/style.css">
         <link rel="stylesheet" href="assets/css/talent-details.css">
+        <link rel="stylesheet" href="assets/css/products.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
 
