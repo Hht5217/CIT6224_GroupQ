@@ -63,7 +63,7 @@ if (isset($_POST['delete_user'])) {
         $error = "Cannot delete the primary admin account.";
     } else {
         // Delete related records from all referenced tables
-        $tables = ['cart', 'comments', 'favorites', 'feedback', 'orders', 'products', 'profiles', 'resources', 'talents', 'user_questions'];
+        $tables = ['cart', 'comments', 'favorites', 'feedback', 'orders', 'products', 'profiles', 'resources', 'talents'];
         foreach ($tables as $table) {
             $sql = "DELETE FROM $table WHERE user_id = ?";
             if ($stmt = mysqli_prepare($conn, $sql)) {
