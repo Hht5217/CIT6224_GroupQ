@@ -29,6 +29,7 @@ mysqli_stmt_bind_param($stmt, "i", $talent_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $talent = mysqli_fetch_assoc($result);
+mysqli_stmt_close($stmt);
 
 if (!$talent) {
     header("Location: talent-catalogue.php");
@@ -43,6 +44,32 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $resource = mysqli_fetch_assoc($result);
 $resource_is_downloadable = $resource['is_downloadable'] ?? 0;
+mysqli_stmt_close($stmt);
+
+// Handle talent update
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_talent') {
+    if (!isset($_SESSION['user_id']) || $talent['user_id'] != $_SESSION['user_id']) {
+        header("Location: login.php");
+        exit();
+    }
+    $title = trim($_POST['title']);
+    $category = trim($_POST['category']);
+    $description = trim($_POST['description']);
+    if (empty($title) || !isset($talent_categories[$category])) {
+        $error = "Title and valid category are required.";
+    } else {
+        $stmt = $conn->prepare("UPDATE talents SET title = ?, category = ?, description = ? WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("sssii", $title, $category, $description, $talent_id, $_SESSION['user_id']);
+        if ($stmt->execute()) {
+            $success = "Talent updated successfully.";
+        } else {
+            $error = "Error updating talent.";
+        }
+        $stmt->close();
+    }
+    header("Location: talent-details.php?id=$talent_id");
+    exit();
+}
 
 // Handle downloadable status update
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_downloadable') {
@@ -194,8 +221,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
 }
 
-// Increment view count
-mysqli_query($conn, "UPDATE talents SET view_count = view_count + 1 WHERE id = $talent_id");
+// Increment view count (session-based with 24-hour window)
+if (!isset($_SESSION['viewed_talents'][$talent_id]) || (time() - $_SESSION['viewed_talents'][$talent_id]) > 86400) {
+    $stmt = $conn->prepare("UPDATE talents SET view_count = view_count + 1 WHERE id = ?");
+    $stmt->bind_param("i", $talent_id);
+    $stmt->execute();
+    $stmt->close();
+    $_SESSION['viewed_talents'][$talent_id] = time();
+}
 
 // Get favorite count
 $sql = "SELECT COUNT(*) as favorites_count FROM favorites WHERE talent_id = ?";
@@ -301,10 +334,10 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
 
         <div class="container">
             <?php if (isset($error)): ?>
-                <div class="alert alert-warning"><?php echo $error; ?></div>
+                <div class="alert alert-warning"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
             <?php if (isset($success)): ?>
-                <div class="alert alert-success"><?php echo $success; ?></div>
+                <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
             <?php endif; ?>
 
             <div class="talent-profile-container">
@@ -333,6 +366,9 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                 <?php echo $is_favorited ? 'Remove from Favorites' : 'Add to Favorites'; ?>
                             </button>
                             <?php if ($talent['user_id'] == $_SESSION['user_id']): ?>
+                                <button class="btn btn-primary" onclick="showEditForm()">
+                                    <i class="fas fa-edit"></i> Edit Talent
+                                </button>
                                 <form method="POST" style="display:inline;">
                                     <input type="hidden" name="action" value="delete-talent">
                                     <button type="submit" class="btn btn-danger"
@@ -344,6 +380,37 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <!-- Edit Talent Modal -->
+                <?php if (!empty($_SESSION['user_id']) && $talent['user_id'] == $_SESSION['user_id']): ?>
+                    <div id="editForm" class="edit-modal" style="display: none;">
+                        <div class="edit-modal-content">
+                            <form id="editTalentForm" method="POST">
+                                <input type="hidden" name="action" value="update_talent">
+                                <div class="form-group">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" id="title"
+                                        value="<?php echo htmlspecialchars($talent['title']); ?>" required maxlength="255">
+                                </div>
+                                <div class="form-group">
+                                    <label for="category">Category</label>
+                                    <select name="category" id="category" required>
+                                        <?php showTalentCategoryOptions($talent['category']); ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea name="description" id="description"
+                                        rows="5"><?php echo htmlspecialchars($talent['description'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Profile Content -->
                 <div class="profile-content">
@@ -414,8 +481,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                                     <input type="file" id="file" name="file" class="form-control"
                                                         data-max-size="<?php echo $maxSizeMB; ?>" required>
                                                     <small class="form-text">Supported types: JPEG, PNG, GIF, MP4, WEBM, OGG,
-                                                        MP3,
-                                                        WAV, TXT, HTML, CSS, JS, PDF, ZIP, CSV, JSON. Max size:
+                                                        MP3, WAV, TXT, HTML, CSS, JS, PDF, ZIP, CSV, JSON. Max size:
                                                         <?php echo number_format($maxSizeMB, 2); ?>MB</small>
                                                 </div>
                                                 <div class="form-actions">
@@ -465,7 +531,6 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                     <p>Please <a href="login.php">login</a> to leave a comment.</p>
                                 </div>
                             <?php endif; ?>
-
                             <div class="comments-list">
                                 <?php if (empty($comments)): ?>
                                     <div class="no-comments">
@@ -578,11 +643,9 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                 function showReplyForm(commentId) {
                     document.getElementById('reply-form-' + commentId).style.display = 'block';
                 }
-
                 function hideReplyForm(commentId) {
                     document.getElementById('reply-form-' + commentId).style.display = 'none';
                 }
-
                 function toggleReplies(commentId) {
                     const repliesDiv = document.getElementById('replies-' + commentId);
                     const button = event.target;
@@ -594,34 +657,34 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                         button.innerHTML = '<i class="fas fa-comments"></i> View Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
                     }
                 }
-
                 function showUploadForm() {
                     document.getElementById('uploadForm').style.display = 'block';
                 }
-
                 function hideUploadForm() {
                     document.getElementById('uploadForm').style.display = 'none';
                 }
-
-                // Auto-show replies if hash starts with #reply-
-                window.addEventListener('load', () => {
-                    if (window.location.hash.startsWith('#reply-')) {
-                        const replyId = window.location.hash.replace('#reply-', '');
-                        const replyElement = document.getElementById('reply-' + replyId);
-                        if (replyElement) {
-                            const repliesDiv = replyElement.closest('.replies');
-                            if (repliesDiv && repliesDiv.style.display === 'none') {
-                                repliesDiv.style.display = 'block';
-                                const button = repliesDiv.previousElementSibling;
-                                if (button && button.classList.contains('view-replies-btn')) {
-                                    button.innerHTML = '<i class="fas fa-comments"></i> Hide Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
-                                }
-                            }
-                        }
+                function showEditForm() {
+                    document.getElementById('editForm').style.display = 'flex';
+                }
+                function hideEditForm() {
+                    document.getElementById('editForm').style.display = 'none';
+                    formIsDirty = false;
+                }
+                let formIsDirty = false;
+                const editForm = document.getElementById('editTalentForm');
+                if (editForm) {
+                    editForm.querySelectorAll('input, textarea, select').forEach(input => {
+                        input.addEventListener('change', () => formIsDirty = true);
+                        input.addEventListener('input', () => formIsDirty = true);
+                    });
+                    editForm.addEventListener('submit', () => formIsDirty = false);
+                }
+                window.addEventListener('beforeunload', (e) => {
+                    if (formIsDirty) {
+                        e.preventDefault();
+                        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
                     }
                 });
-
-                // Toggle favorite
                 document.querySelector('.toggle-favorite')?.addEventListener('click', function () {
                     const talentId = this.dataset.talentId;
                     const action = this.dataset.action;
@@ -641,7 +704,6 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                             }
                         });
                 });
-
                 window.addEventListener('load', () => {
                     if (window.location.hash.startsWith('#reply-')) {
                         const replyId = window.location.hash.replace('#reply-', '');
