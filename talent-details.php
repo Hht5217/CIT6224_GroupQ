@@ -636,92 +636,93 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                     </div>
                 </div>
             </div>
+        </div>
 
-            <?php include 'includes/footer-inc.php'; ?>
+        <?php include 'includes/footer-inc.php'; ?>
 
-            <script src="assets/js/validateFileSize.js"></script>
-            <script>
-                function showReplyForm(commentId) {
-                    document.getElementById('reply-form-' + commentId).style.display = 'block';
+        <script src="assets/js/validateFileSize.js"></script>
+        <script>
+            function showReplyForm(commentId) {
+                document.getElementById('reply-form-' + commentId).style.display = 'block';
+            }
+            function hideReplyForm(commentId) {
+                document.getElementById('reply-form-' + commentId).style.display = 'none';
+            }
+            function toggleReplies(commentId) {
+                const repliesDiv = document.getElementById('replies-' + commentId);
+                const button = event.target;
+                if (repliesDiv.style.display === 'none') {
+                    repliesDiv.style.display = 'block';
+                    button.innerHTML = '<i class="fas fa-comments"></i> Hide Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
+                } else {
+                    repliesDiv.style.display = 'none';
+                    button.innerHTML = '<i class="fas fa-comments"></i> View Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
                 }
-                function hideReplyForm(commentId) {
-                    document.getElementById('reply-form-' + commentId).style.display = 'none';
+            }
+            function showUploadForm() {
+                document.getElementById('uploadForm').style.display = 'block';
+            }
+            function hideUploadForm() {
+                document.getElementById('uploadForm').style.display = 'none';
+            }
+            function showEditForm() {
+                document.getElementById('editForm').style.display = 'flex';
+            }
+            function hideEditForm() {
+                document.getElementById('editForm').style.display = 'none';
+                formIsDirty = false;
+            }
+            let formIsDirty = false;
+            const editForm = document.getElementById('editTalentForm');
+            if (editForm) {
+                editForm.querySelectorAll('input, textarea, select').forEach(input => {
+                    input.addEventListener('change', () => formIsDirty = true);
+                    input.addEventListener('input', () => formIsDirty = true);
+                });
+                editForm.addEventListener('submit', () => formIsDirty = false);
+            }
+            window.addEventListener('beforeunload', (e) => {
+                if (formIsDirty) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
                 }
-                function toggleReplies(commentId) {
-                    const repliesDiv = document.getElementById('replies-' + commentId);
-                    const button = event.target;
-                    if (repliesDiv.style.display === 'none') {
-                        repliesDiv.style.display = 'block';
-                        button.innerHTML = '<i class="fas fa-comments"></i> Hide Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
-                    } else {
-                        repliesDiv.style.display = 'none';
-                        button.innerHTML = '<i class="fas fa-comments"></i> View Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
-                    }
-                }
-                function showUploadForm() {
-                    document.getElementById('uploadForm').style.display = 'block';
-                }
-                function hideUploadForm() {
-                    document.getElementById('uploadForm').style.display = 'none';
-                }
-                function showEditForm() {
-                    document.getElementById('editForm').style.display = 'flex';
-                }
-                function hideEditForm() {
-                    document.getElementById('editForm').style.display = 'none';
-                    formIsDirty = false;
-                }
-                let formIsDirty = false;
-                const editForm = document.getElementById('editTalentForm');
-                if (editForm) {
-                    editForm.querySelectorAll('input, textarea, select').forEach(input => {
-                        input.addEventListener('change', () => formIsDirty = true);
-                        input.addEventListener('input', () => formIsDirty = true);
+            });
+            document.querySelector('.toggle-favorite')?.addEventListener('click', function () {
+                const talentId = this.dataset.talentId;
+                const action = this.dataset.action;
+                fetch('toggle-favorite.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `talent_id=${talentId}&action=${action}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
                     });
-                    editForm.addEventListener('submit', () => formIsDirty = false);
-                }
-                window.addEventListener('beforeunload', (e) => {
-                    if (formIsDirty) {
-                        e.preventDefault();
-                        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-                    }
-                });
-                document.querySelector('.toggle-favorite')?.addEventListener('click', function () {
-                    const talentId = this.dataset.talentId;
-                    const action = this.dataset.action;
-                    fetch('toggle-favorite.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `talent_id=${talentId}&action=${action}`
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                location.reload();
-                            } else {
-                                alert(data.message);
-                            }
-                        });
-                });
-                window.addEventListener('load', () => {
-                    if (window.location.hash.startsWith('#reply-')) {
-                        const replyId = window.location.hash.replace('#reply-', '');
-                        const replyElement = document.getElementById('reply-' + replyId);
-                        if (replyElement) {
-                            const repliesDiv = replyElement.closest('.replies');
-                            if (repliesDiv && repliesDiv.style.display === 'none') {
-                                repliesDiv.style.display = 'block';
-                                const button = repliesDiv.previousElementSibling;
-                                if (button && button.classList.contains('view-replies-btn')) {
-                                    button.innerHTML = '<i class="fas fa-comments"></i> Hide Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
-                                }
+            });
+            window.addEventListener('load', () => {
+                if (window.location.hash.startsWith('#reply-')) {
+                    const replyId = window.location.hash.replace('#reply-', '');
+                    const replyElement = document.getElementById('reply-' + replyId);
+                    if (replyElement) {
+                        const repliesDiv = replyElement.closest('.replies');
+                        if (repliesDiv && repliesDiv.style.display === 'none') {
+                            repliesDiv.style.display = 'block';
+                            const button = repliesDiv.previousElementSibling;
+                            if (button && button.classList.contains('view-replies-btn')) {
+                                button.innerHTML = '<i class="fas fa-comments"></i> Hide Replies (' + repliesDiv.querySelectorAll('.reply').length + ')';
                             }
                         }
                     }
-                });
-            </script>
+                }
+            });
+        </script>
     </body>
 
 </html>
