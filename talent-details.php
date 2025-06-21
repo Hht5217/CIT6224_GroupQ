@@ -340,6 +340,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                 <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
             <?php endif; ?>
 
+            <a href="talent-catalogue.php" class="btn btn-secondary">Back to Talent Catalogue</a>
             <div class="talent-profile-container">
                 <!-- Profile Header -->
                 <div class="profile-header">

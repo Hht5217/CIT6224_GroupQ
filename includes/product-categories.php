@@ -17,4 +17,16 @@ function showProductCategoryOptions($selected = '')
         echo "<option value=\"$key\" $isSelected>$label</option>";
     }
 }
+
+function getDefaultProductImage($category)
+{
+    $base_path = 'assets/images/products/';
+    $image = $base_path . $category . '.jpg';
+    return [
+        'path' => $image,
+        'exists' => file_exists($image),
+        'fallback_path' => $base_path . 'default.jpg',
+        'fallback_exists' => file_exists($base_path . 'default.jpg')
+    ];
+}
 ?>

@@ -152,25 +152,16 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                                 <?php endif; ?>
                             </div>
                             <div class="product-details">
-                                <h3><?php echo $product['title']; ?></h3>
-                                <p class="seller">Seller: <?php echo $product['seller_name']; ?></p>
+                                <h3><?php echo htmlspecialchars($product['title']); ?></h3>
+                                <p class="seller">Seller: <?php echo htmlspecialchars($product['seller_name']); ?></p>
                                 <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
                                 <p class="category">
                                     <?php echo isset($product_categories[$product['category']]) ? htmlspecialchars($product_categories[$product['category']]) : 'Not specified'; ?>
                                 </p>
                                 <p class="description"><?php echo substr($product['description'], 0, 100) . '...'; ?></p>
-
-                                <?php if (isset($_SESSION['user_id']) && $product['status'] === 'active'): ?>
-                                    <form action="add-to-cart.php" method="post" class="add-to-cart-form">
-                                        <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                                        <input type="number" name="quantity" value="1" min="1" class="form-control quantity-input">
-                                        <button type="submit" class="btn btn-primary">Add to Cart</button>
-                                    </form>
-                                <?php elseif (isset($_SESSION['user_id']) && $product['status'] !== 'active'): ?>
-                                    <p class="out-of-stock">Out of Stock</p>
-                                <?php elseif (!isset($_SESSION['user_id'])): ?>
-                                    <a href="login.php" class="btn btn-secondary">Login to Purchase</a>
-                                <?php endif; ?>
+                                <p class="status"><?php echo ucfirst($product['status']); ?></p>
+                                <a href="product-details.php?id=<?php echo $product['id']; ?>" class="btn btn-primary">View
+                                    Details</a>
                             </div>
                         </div>
                     <?php endforeach; ?>

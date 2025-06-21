@@ -1,5 +1,7 @@
 <?php
 require_once 'includes/members-data.php';
+include 'includes/timeout.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,11 +16,7 @@ require_once 'includes/members-data.php';
 
     <body>
         <?php include 'includes/header-inc.php'; ?>
-        <nav class="nav">
-            <ul>
-                <li><a href="index.php">Home</a></li>
-            </ul>
-        </nav>
+        <?php include 'includes/navbar.php'; ?>
 
         <main class="group-members">
             <h1>Group Members</h1>

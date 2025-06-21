@@ -13,52 +13,99 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
-    switch ($_POST['action']) {
-        case 'update_status':
-            $product_id = (int) $_POST['product_id'];
-            $new_status = $_POST['status'];
-
-            $stmt = $conn->prepare("UPDATE products SET status = ? WHERE id = ? AND user_id = ?");
-            $stmt->bind_param("sii", $new_status, $product_id, $user_id);
-            $stmt->execute();
-            break;
-
-        case 'add_product':
-            $title = trim($_POST['title']);
-            $description = trim($_POST['description']);
-            $price = floatval($_POST['price']);
-            $category = trim($_POST['category']);
-
-            if (empty($title) || empty($description) || $price <= 0 || empty($category)) {
-                $error = "All fields are required and price must be positive";
-            } elseif (!isset($_FILES['image']) || $_FILES['image']['error'] == UPLOAD_ERR_NO_FILE) {
-                $error = "Please select an image to upload";
-            } elseif (!array_key_exists($category, $product_categories)) {
-                $error = "Invalid category selected";
-            } else {
-                $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-                $result = uploadFile($_FILES['image'], 'Uploads/products/', $allowed_types, $maxSizeMB);
-                if ($result['error']) {
-                    $error = $result['error'];
-                } else {
-                    $stmt = $conn->prepare("INSERT INTO products (user_id, title, description, price, category, image_url) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("issdss", $user_id, $title, $description, $price, $category, $result['filepath']);
+    if (!isset($conn)) {
+        $error = "Database connection not available.";
+        error_log("Database connection missing in products.php");
+    } elseif ($user_id == 0) {
+        $error = "User not logged in.";
+        error_log("User ID is 0 in products.php");
+    } else {
+        switch ($_POST['action']) {
+            case 'update_status':
+                $product_id = (int) $_POST['product_id'];
+                $new_status = $_POST['status'];
+                $stmt = $conn->prepare("UPDATE products SET status = ? WHERE id = ? AND user_id = ?");
+                if ($stmt) {
+                    $stmt->bind_param("sii", $new_status, $product_id, $user_id);
                     if ($stmt->execute()) {
-                        $success = "Product added successfully";
+                        $success = "Status updated successfully.";
                     } else {
-                        $error = "Error adding product";
-                        if (file_exists($result['filepath'])) {
-                            unlink($result['filepath']);
+                        $error = "Error updating status: " . $stmt->error;
+                        error_log("Update status error: " . $stmt->error);
+                    }
+                    $stmt->close();
+                } else {
+                    $error = "Failed to prepare update statement.";
+                    error_log("Prepare update statement failed: " . $conn->error);
+                }
+                break;
+
+            case 'add_product':
+                $title = trim($_POST['title']);
+                $description = trim($_POST['description']);
+                $price = floatval($_POST['price']);
+                $category = trim($_POST['category']);
+
+                if (empty($title) || empty($description) || $price <= 0 || empty($category)) {
+                    $error = "All fields are required and price must be positive.";
+                    error_log("Validation failed: title='$title', description='$description', price=$price, category='$category'");
+                } elseif (!array_key_exists($category, $product_categories)) {
+                    $error = "Invalid category selected.";
+                    error_log("Invalid category: $category");
+                } else {
+                    $image_url = '';
+                    if (isset($_FILES['image']) && $_FILES['image']['error'] != UPLOAD_ERR_NO_FILE) {
+                        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+                        $result = uploadFile($_FILES['image'], 'Uploads/products/', $allowed_types, $maxSizeMB);
+                        if ($result['error']) {
+                            $error = $result['error'];
+                            error_log("Upload error: " . $result['error']);
+                        } else {
+                            $image_url = $result['filepath'];
+                        }
+                    } else {
+                        $image_result = getDefaultProductImage($category);
+                        if ($image_result['exists']) {
+                            $image_url = $image_result['path'];
+                        } elseif ($image_result['fallback_exists']) {
+                            $image_url = $image_result['fallback_path'];
+                        } else {
+                            $error = "Default image for category '$category' not found at: " . $image_result['path'] .
+                                ", fallback not found at: " . $image_result['fallback_path'];
+                            error_log("Default image missing: " . $image_result['path'] . ", fallback missing: " . $image_result['fallback_path']);
+                        }
+                    }
+
+                    if (!$error) {
+                        $stmt = $conn->prepare("INSERT INTO products (user_id, title, description, price, category, image_url) VALUES (?, ?, ?, ?, ?, ?)");
+                        if ($stmt) {
+                            $stmt->bind_param("issdss", $user_id, $title, $description, $price, $category, $image_url);
+                            if ($stmt->execute()) {
+                                $success = "Product added successfully.";
+                                $_SESSION['success'] = $success; // Store success message for redirect
+                            } else {
+                                $error = "Error adding product: " . $stmt->error;
+                                error_log("Insert error: " . $stmt->error);
+                                if ($image_url && file_exists($image_url) && strpos($image_url, 'Uploads/products/') === 0) {
+                                    unlink($image_url);
+                                }
+                            }
+                            $stmt->close();
+                        } else {
+                            $error = "Failed to prepare insert statement: " . $conn->error;
+                            error_log("Prepare insert statement failed: " . $conn->error);
                         }
                     }
                 }
-            }
-            break;
+                break;
+        }
     }
 
-    // Refresh the page
-    header("Location: user-dashboard.php?page=products");
-    exit();
+    // Only redirect on success
+    if ($success && !$error) {
+        header("Location: user-dashboard.php?page=products");
+        exit();
+    }
 }
 ?>
 
@@ -70,18 +117,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         </button>
     </div>
 
-    <?php if (!empty($error)): ?>
-        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php
+    // Display session success message if set
+    if (isset($_SESSION['success'])) {
+        echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success']) . '</div>';
+        unset($_SESSION['success']);
+    }
+    if (!empty($error)): ?>
+        <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
 
     <?php if (!empty($success)): ?>
-        <div class="alert alert-success"><?php echo $success; ?></div>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
     <?php endif; ?>
 
     <!-- Add Product Form -->
     <div id="addForm" class="add-form" style="display: none;">
         <form action="user-dashboard.php?page=products" method="post" enctype="multipart/form-data"
-            onsubmit="return validateFileSize();">
+            onsubmit="return validateForm(this);">
             <input type="hidden" name="action" value="add_product">
 
             <div class="form-group">
@@ -96,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
             <div class="form-group">
                 <label for="price">Price ($)</label>
-                <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required>
+                <input type="number" id="price" name="price" class="form-control" step="0.01" min="0.01" required>
             </div>
 
             <div class="form-group">
@@ -108,11 +161,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             </div>
 
             <div class="form-group">
-                <label for="image">Product Image</label>
+                <label for="image">Product Image (Optional)</label>
                 <input type="file" id="image" name="image" class="form-control" accept="image/jpeg,image/png,image/gif"
-                    data-max-size="<?php echo $maxSizeMB; ?>" required>
+                    data-max-size="<?php echo $maxSizeMB; ?>">
                 <small class="form-text">Supported types: JPG, PNG, GIF. Max size:
-                    <?php echo number_format($maxSizeMB, 2); ?>MB</small>
+                    <?php echo number_format($maxSizeMB, 2); ?>MB. If no image is uploaded, a default image based on the
+                    category will be used.</small>
             </div>
 
             <div class="form-actions">
@@ -169,6 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                             </select>
                             <button type="submit" class="btn btn-sm btn-primary">Save Change</button>
                         </form>
+                        <a href="product-details.php?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-secondary">View
+                            Details</a>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -184,5 +240,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
     function hideAddForm() {
         document.getElementById('addForm').style.display = 'none';
+    }
+
+    function validateForm(form) {
+        const fileInput = form.querySelector('#image');
+        if (fileInput.files.length > 0) {
+            return validateFileSize(); // Assume validateFileSize.js returns true/false
+        }
+        return true; // Skip file validation if no file is selected
     }
 </script>

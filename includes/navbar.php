@@ -23,6 +23,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li><a href="announcements.php" <?php echo $current_page == 'announcements.php' ? 'class="active"' : ''; ?>><i class="fas fa-newspaper"></i> News & Announcements</a></li>
                 <li><a href="faq.php" <?php echo $current_page == 'faq.php' ? 'class="active"' : ''; ?>><i
                             class="fas fa-question-circle"></i> FAQ</a></li>
+                <li><a href="about-us.php" <?php echo $current_page == 'about-us.php' ? 'class="active"' : ''; ?>><i
+                            class="fas fa-users"></i> About Us</a></li>
             </ul>
         </li>
         <li class="dropdown">

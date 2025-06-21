@@ -139,6 +139,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Shopping Cart - MMU Talent Showcase</title>
         <link rel="stylesheet" href="assets/css/style.css">
+        <link rel="stylesheet" href="assets/css/cart.css">
     </head>
 
     <body>
@@ -159,7 +160,8 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
 
                 <?php if (empty($cart_items)): ?>
                     <div class="empty-cart">
-                        <p>Your cart is empty</p>
+                        <p>Your cart is empty.</p>
+                        <i class="fas fa-shopping-cart"></i>
                         <div class="cart-actions">
                             <a href="products.php" class="btn btn-primary">Browse Products</a>
                             <a href="user-dashboard.php?page=orders&tab=purchases" class="btn btn-secondary">View My
