@@ -10,15 +10,14 @@
 }
 
 .group-members {
-    max-width: 1200px;
-    margin: 3rem auto;
+    margin: 1rem auto;
     padding: 0 2rem;
 }
 
 .group-members h1 {
     text-align: center;
     color: var(--primary-color);
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
     font-size: 2.5rem;
     position: relative;
     padding-bottom: 1rem;
