@@ -324,7 +324,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($talent['title']); ?> - Talent Details</title>
         <link rel="stylesheet" href="assets/css/style.css">
-        <link rel="stylesheet" href="assets/css/talent-details.css">
+        <link rel="stylesheet" href="assets/css/details.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
 
@@ -341,16 +341,16 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
             <?php endif; ?>
 
             <a href="talent-catalogue.php" class="btn btn-secondary">Back to Talent Catalogue</a>
-            <div class="talent-profile-container">
+            <div class="details-container">
                 <!-- Profile Header -->
-                <div class="profile-header">
-                    <div class="profile-info">
+                <div class="details-header">
+                    <div class="details-info">
                         <h1><?php echo htmlspecialchars($talent['title']); ?></h1>
                         <p class="talent-category">
                             <i class="fas fa-star"></i>
                             <?php echo isset($talent_categories[$talent['category']]) ? htmlspecialchars($talent_categories[$talent['category']]) : 'Not specified'; ?>
                         </p>
-                        <div class="profile-stats">
+                        <div class="details-stats">
                             <span><i class="fas fa-eye"></i> <?php echo $talent['view_count']; ?> Views</span>
                             <span><i class="fas fa-heart"></i> <?php echo $favorites_count; ?> Favorites</span>
                         </div>
@@ -414,9 +414,9 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                 <?php endif; ?>
 
                 <!-- Profile Content -->
-                <div class="profile-content">
+                <div class="details-content">
                     <!-- File Preview Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-file"></i> File</h2>
                         <div class="section-content">
                             <?php if ($talent['media_path'] === 'deleted'): ?>
@@ -508,7 +508,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                     </div>
 
                     <!-- Description Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-info-circle"></i> Description</h2>
                         <div class="section-content">
                             <p><?php echo nl2br(htmlspecialchars($talent['description'] ?? 'No description available.')); ?>

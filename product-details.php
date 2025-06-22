@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($product['title']); ?> - Product Details</title>
         <link rel="stylesheet" href="assets/css/style.css">
-        <link rel="stylesheet" href="assets/css/talent-details.css">
+        <link rel="stylesheet" href="assets/css/details.css">
         <link rel="stylesheet" href="assets/css/products.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
@@ -101,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
             <a href="products.php" class="btn btn-secondary">Back to Products</a>
 
-            <div class="talent-profile-container">
-                <div class="profile-header">
-                    <div class="profile-info">
+            <div class="details-container">
+                <div class="details-header">
+                    <div class="details-info">
                         <h1><?php echo htmlspecialchars($product['title']); ?></h1>
                         <p class="talent-category">
                             <i class="fas fa-star"></i>
@@ -166,9 +166,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                 <?php endif; ?>
 
                 <!-- Profile Content -->
-                <div class="profile-content">
+                <div class="details-content">
                     <!-- Image Preview Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-image"></i> Product Image</h2>
                         <div class="section-content">
                             <?php if (!empty($product['image_url'])): ?>
@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     </div>
 
                     <!-- Description Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-info-circle"></i> Description</h2>
                         <div class="section-content">
                             <p><?php echo nl2br(htmlspecialchars($product['description'] ?? 'No description available.')); ?>
@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                     </div>
 
                     <!-- Buy Product Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-shopping-cart"></i> Buy Product</h2>
                         <p class="price">$<?php echo number_format($product['price'], 2); ?></p>
                         <div class="section-content">

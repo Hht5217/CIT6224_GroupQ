@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         $cat = $talent['category'] ?? '';
                         echo isset($talent_categories[$cat]) ? $talent_categories[$cat] : 'Not specified';
                         ?></p>
-                        <a href="talent-details.php?id=<?php echo $talent['id']; ?>" class="btn">View Details</a>
+                        <a href="talent-details.php?id=<?php echo $talent['id']; ?>" class="btn-primary">View Details</a>
                     </div>
                 </div>
             <?php endforeach; ?>

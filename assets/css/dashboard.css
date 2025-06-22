@@ -165,23 +165,6 @@
     margin: 0;
 }
 
-.btn-danger {
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
-.btn-sm {
-    font-size: 0.875rem;
-}
-
 /* Order table styles in user dashboard overview */
 .order-table {
     width: 100%;
@@ -227,7 +210,7 @@
     color: #fff;
 }
 
-.order-table .status-badge.cancelled {
+.order-table .status-badge.cancelled, .status-badge.rejected {
     background: #dc3545;
     color: #fff;
 }

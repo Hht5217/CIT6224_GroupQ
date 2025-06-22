@@ -132,7 +132,7 @@ $stmt->close();
                             <input type="hidden" name="action" value="update_downloadable">
                             <input type="hidden" name="resource_id" value="<?php echo $resource['id']; ?>">
                             <label>
-                                <input type="checkbox" name="is_downloadable" value="1" <?php echo $resource['is_downloadable'] ? 'checked' : ''; ?> onchange="this.form.submit()" style="margin-left: -10%">
+                                <input type="checkbox" name="is_downloadable" value="1" <?php echo $resource['is_downloadable'] ? 'checked' : ''; ?> onchange="this.form.submit()">
                                 Make downloadable
                             </label>
                         </form>

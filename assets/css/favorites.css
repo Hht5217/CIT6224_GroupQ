@@ -9,7 +9,7 @@
     background: #fff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s;
 }
 
@@ -64,12 +64,3 @@
     color: #666;
     margin-bottom: 1.5rem;
 }
-
-.btn-danger {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-} 

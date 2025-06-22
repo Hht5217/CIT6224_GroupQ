@@ -27,25 +27,27 @@ a {
 }
 
 .header {
-    background: #333;
+    background: #2A7B9B;
+    background: linear-gradient(0deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 100%);
     color: #fff;
-    padding: 1rem;
+    padding: 2rem 1rem;
     text-align: center;
 }
 
 .footer {
-    background: #333;
+    background: #2A7B9B;
+    background: linear-gradient(180deg, rgba(42, 123, 155, 1) 0%, rgba(67, 164, 143, 1) 100%);
     color: #fff;
     text-align: center;
-    padding: 1rem 0;
+    /* padding: 0.5rem 0; */
     position: relative;
     flex-shrink: 0;
 }
 
 .nav {
-    background-color: #333;
+    background-color: #2A7B9B;
     padding: 1rem 0;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .nav ul {
@@ -69,13 +71,13 @@ a {
 .nav-list li a:hover,
 .dropdown-toggle:hover,
 .nav-list li a.active {
-    background-color: #444;
+    background-color: #1f596f;
 }
 
 .dropdown-menu {
     display: none;
     position: absolute;
-    background: #333;
+    background: #3392b8;
     min-width: 200px;
     border-radius: 0 0 8px 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -99,12 +101,12 @@ a {
 
 .dropdown-menu li a:hover,
 .dropdown-menu li a.active {
-    background: #4CAF50;
+    background: #1f596f;
     color: #fff;
 }
 
 .dropdown:hover>.dropdown-toggle {
-    background: #444;
+    background: #1f596f;
 }
 
 .nav-list li a.active,
@@ -114,7 +116,7 @@ a {
 }
 
 .admin-nav {
-    background-color: #333;
+    background-color: #2A7B9B;
     padding: 1rem 0;
     margin-bottom: 2rem;
 }
@@ -142,7 +144,7 @@ a {
 }
 
 .admin-nav a:hover {
-    background-color: #444;
+    background-color: #1f596f;
 }
 
 .admin-nav a.active {
@@ -559,9 +561,10 @@ form+.btn {
     color: #333;
 }
 
-/* .resource-actions {
-    margin-left: 20px;
-} */
+.resource-actions {
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
 
 /* Talent Details Page Styles */
 .talent-profile {
@@ -826,7 +829,7 @@ form+.btn {
 }
 
 /* Profile Page Styles */
-.profile-section {
+.details-section {
     background: #fff;
     border-radius: 8px;
     padding: 20px;
@@ -834,7 +837,7 @@ form+.btn {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-section h3 {
+.details-section h3 {
     color: #333;
     margin-bottom: 20px;
     padding-bottom: 10px;
@@ -914,7 +917,7 @@ select.form-control {
 
 /* Responsive Design */
 @media (max-width: 800px) {
-    .profile-section {
+    .details-section {
         padding: 15px;
     }
 
@@ -1171,6 +1174,13 @@ select.form-control {
     }
 }
 
+.upload-form {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
 /* Statistics */
 .statistics {
     display: flex;
@@ -1240,6 +1250,11 @@ select.form-control {
 
 .talent-stats span i {
     color: #4CAF50;
+}
+
+.talent-icon {
+    text-align: center;
+    padding: 0.5rem;
 }
 
 /* Dashboard Styles */

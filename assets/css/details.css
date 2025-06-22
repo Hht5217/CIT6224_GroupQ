@@ -1,10 +1,10 @@
-.talent-profile-container {
+.details-container {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-.profile-header {
+.details-header {
     display: flex;
     gap: 2rem;
     background: #fff;
@@ -27,11 +27,11 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-info {
+.details-info {
     flex: 1;
 }
 
-.profile-info h1 {
+.details-info h1 {
     margin: 0 0 0.5rem 0;
     color: #333;
 }
@@ -42,22 +42,22 @@
     margin-bottom: 1rem;
 }
 
-.profile-stats {
+.details-stats {
     display: flex;
     gap: 2rem;
     margin: 1rem 0;
 }
 
-.profile-stats span {
+.details-stats span {
     color: #666;
 }
 
-.profile-stats i {
+.details-stats i {
     color: #4CAF50;
     margin-right: 0.5rem;
 }
 
-.profile-section {
+.details-section {
     background: #fff;
     padding: 2rem;
     border-radius: 10px;
@@ -65,7 +65,7 @@
     margin-bottom: 1rem;
 }
 
-.profile-section h2 {
+.details-section h2 {
     color: #333;
     margin-bottom: 1.5rem;
     display: flex;
@@ -73,11 +73,11 @@
     gap: 0.5rem;
 }
 
-.profile-section h2 i {
+.details-section h2 i {
     color: #4CAF50;
 }
 
-.talents-grid {
+/* .talents-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
@@ -98,7 +98,7 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
-}
+} */
 
 .talent-info {
     padding: 1.5rem;

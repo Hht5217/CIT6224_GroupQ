@@ -43,7 +43,7 @@ $talents = mysqli_stmt_get_result($stmt);
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($user['full_name']); ?> - Profile</title>
         <link rel="stylesheet" href="assets/css/style.css">
-        <link rel="stylesheet" href="assets/css/talent-details.css">
+        <link rel="stylesheet" href="assets/css/details.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
 
@@ -52,14 +52,14 @@ $talents = mysqli_stmt_get_result($stmt);
         <?php include 'includes/navbar.php'; ?>
 
         <div class="container">
-            <div class="talent-profile-container">
+            <div class="details-container">
                 <!-- Profile Header -->
-                <div class="profile-header">
+                <div class="details-header">
                     <div class="profile-image-container">
                         <img src="<?php echo !empty($user['profile_picture']) ? htmlspecialchars($user['profile_picture']) : 'assets/images/default-avatar.png'; ?>"
                             alt="<?php echo htmlspecialchars($user['username']); ?>" class="profile-image">
                     </div>
-                    <div class="profile-info">
+                    <div class="details-info">
                         <h1><?php echo htmlspecialchars($user['username']); ?></h1>
                         <p class="talent-category">
                             <i class="fas fa-user"></i>
@@ -69,9 +69,9 @@ $talents = mysqli_stmt_get_result($stmt);
                 </div>
 
                 <!-- Profile Content -->
-                <div class="profile-content">
+                <div class="details-content">
                     <!-- About Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-user"></i> About</h2>
                         <div class="section-content">
                             <p><?php echo !empty(trim($user['bio'])) ? nl2br(htmlspecialchars($user['bio'])) : 'No bio available.'; ?>
@@ -80,7 +80,7 @@ $talents = mysqli_stmt_get_result($stmt);
                     </div>
 
                     <!-- Contacts Section -->
-                    <div class="profile-section">
+                    <div class="details-section">
                         <h2><i class="fas fa-address-book"></i> Contact</h2>
                         <div class="section-content">
                             <p><strong>Email:</strong>
@@ -101,11 +101,11 @@ $talents = mysqli_stmt_get_result($stmt);
 
                     <!-- Talents Section -->
                     <?php if (mysqli_num_rows($talents) > 0): ?>
-                        <div class="profile-section">
+                        <div class="details-section">
                             <h2><i class="fas fa-star"></i> Talents</h2>
-                            <div class="talents-grid">
+                            <div class="grid">
                                 <?php while ($talent = mysqli_fetch_assoc($talents)): ?>
-                                    <div class="talent-card">
+                                    <div class="card">
                                         <div class="talent-icon">
                                             <?php
                                             $icon = 'fa-file';
@@ -139,7 +139,7 @@ $talents = mysqli_stmt_get_result($stmt);
                             </div>
                         </div>
                     <?php else: ?>
-                        <div class="profile-section">
+                        <div class="details-section">
                             <h2><i class="fas fa-star"></i> Talents</h2>
                             <div class="empty-state">
                                 <i class="fas fa-star"></i>

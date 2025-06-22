@@ -12,30 +12,6 @@
     margin-bottom: 1.5rem;
 }
 
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333;
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.form-text {
-    display: block;
-    margin-top: 0.25rem;
-    color: #666;
-    font-size: 0.875rem;
-}
-
 .form-actions {
     display: flex;
     gap: 1rem;

@@ -28,7 +28,7 @@ $resources = mysqli_query($conn, $sql);
                 <div class="resource-header">
                     <h2>Resources</h2>
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="upload-resource.php" class="btn">Upload Resource</a>
+                        <a href="upload-resource.php" class="btn-primary"><i class="fas fa-upload"></i> Upload Resource</a>
                     <?php endif; ?>
                 </div>
                 <div class="resource-list">
@@ -44,11 +44,13 @@ $resources = mysqli_query($conn, $sql);
                                 </div>
                                 <?php if ($resource['description']): ?>
                                     <p class="resource-description">
-                                        <?php echo nl2br(htmlspecialchars($resource['description'])); ?></p>
+                                        <?php echo nl2br(htmlspecialchars($resource['description'])); ?>
+                                    </p>
                                 <?php endif; ?>
                             </div>
                             <div class="resource-actions">
-                                <a href="download-resource.php?id=<?php echo $resource['id']; ?>" class="btn">Download</a>
+                                <a href="download-resource.php?id=<?php echo $resource['id']; ?>" class="btn-primary"><i
+                                        class="fas fa-download"></i> Download</a>
                             </div>
                         </div>
                     <?php endwhile; ?>

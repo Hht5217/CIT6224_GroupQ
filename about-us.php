@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'includes/members-data.php';
 include 'includes/timeout.php';
 

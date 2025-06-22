@@ -70,7 +70,7 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
                         showTalentCategoryOptions($category);
                         ?>
                     </select>
-                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="submit" class="btn">Search</button>
                 </div>
             </form>
 

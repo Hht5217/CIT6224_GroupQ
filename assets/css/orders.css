@@ -49,7 +49,7 @@
     color: #2e7d32;
 }
 
-.order-status.cancelled {
+.order-status.cancelled, .order-status.rejected {
     background: #ffebee;
     color: #c62828;
 }
@@ -175,9 +175,4 @@
 
 .action-form {
     display: inline-block;
-}
-
-.btn-sm {
-    padding: 5px 10px;
-    font-size: 0.9em;
 }
