@@ -117,15 +117,15 @@ $stmt->close();
                     </div>
                     <div class="resource-info">
                         <h3><?php echo htmlspecialchars($resource['title']); ?></h3>
+                        <?php if ($resource['description']): ?>
+                            <p class="resource-description"><?php echo nl2br(htmlspecialchars($resource['description'])); ?></p>
+                        <?php endif; ?>
                         <p class="resource-meta">
                             <span><i class="fas fa-download"></i> <?php echo $resource['download_count']; ?></span>
                             <span><i class="fas fa-calendar"></i>
                                 <?php echo date('M d, Y', strtotime($resource['created_at'])); ?></span>
                             <span><i class="fas fa-weight"></i> <?php echo formatFileSize($resource['file_size']); ?></span>
                         </p>
-                        <?php if ($resource['description']): ?>
-                            <p class="resource-description"><?php echo nl2br(htmlspecialchars($resource['description'])); ?></p>
-                        <?php endif; ?>
                     </div>
                     <div class="resource-actions">
                         <form method="POST">
@@ -136,12 +136,14 @@ $stmt->close();
                                 Make downloadable
                             </label>
                         </form>
-                        <a href="download-resource.php?id=<?php echo $resource['id']; ?>" class="btn btn-sm btn-primary">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                        <button onclick="deleteResource(<?php echo $resource['id']; ?>)" class="btn btn-sm btn-danger">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
+                        <div>
+                            <a href="download-resource.php?id=<?php echo $resource['id']; ?>" class="btn btn-sm btn-primary">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <button onclick="deleteResource(<?php echo $resource['id']; ?>)" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>

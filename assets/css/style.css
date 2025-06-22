@@ -5,21 +5,19 @@
     box-sizing: border-box;
 }
 
-html, body {
-    height: 100%;
-}
-
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
     background-color: #f4f4f4;
     min-height: 100vh;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
 }
 
+a {
+    text-decoration: none;
+}
 
-/* Container */
 .container {
     width: 80%;
     margin: auto;
@@ -28,7 +26,6 @@ body {
     flex: 1 0 auto;
 }
 
-/* Header */
 .header {
     background: #333;
     color: #fff;
@@ -36,7 +33,6 @@ body {
     text-align: center;
 }
 
-/* Footer */
 .footer {
     background: #333;
     color: #fff;
@@ -46,7 +42,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Navigation */
 .nav {
     background-color: #333;
     padding: 1rem 0;
@@ -57,7 +52,6 @@ body {
     list-style: none;
     margin: 0;
     padding: 0;
-    /* display: flex; */
     justify-content: center;
     flex-wrap: wrap;
     gap: 1rem;
@@ -109,9 +103,7 @@ body {
     color: #fff;
 }
 
-/* Optional: visually indicate dropdown toggle is open (on hover) */
-.dropdown:hover>.dropdown-toggle,
-.dropdown:focus-within>.dropdown-toggle {
+.dropdown:hover>.dropdown-toggle {
     background: #444;
 }
 
@@ -567,9 +559,9 @@ form+.btn {
     color: #333;
 }
 
-.resource-actions {
+/* .resource-actions {
     margin-left: 20px;
-}
+} */
 
 /* Talent Details Page Styles */
 .talent-profile {
@@ -857,19 +849,19 @@ form+.btn {
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
     color: #555;
     font-weight: 500;
 }
 
 .form-control {
     width: 100%;
-    padding: 10px;
+    padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
@@ -880,6 +872,13 @@ form+.btn {
     border-color: #4CAF50;
     outline: none;
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    color: #666;
+    font-size: 0.875rem;
 }
 
 textarea.form-control {
@@ -1255,6 +1254,7 @@ select.form-control {
     background: #fff;
     padding: 2rem;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    height: fit-content;
 }
 
 .user-info {
