@@ -307,7 +307,7 @@ form+.btn {
 }
 
 /* Responsive */
-@media(max-width: 800px) {
+@media(max-width: 768px) {
     .container {
         width: 95%;
     }
@@ -682,7 +682,7 @@ form+.btn {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     .talent-profile {
         flex-direction: column;
     }
@@ -778,7 +778,7 @@ form+.btn {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     .user-info {
         flex-direction: column;
         align-items: center;
@@ -920,7 +920,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     .details-section {
         padding: 15px;
     }
@@ -960,7 +960,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {}
+@media (max-width: 768px) {}
 
 /* Products Page Styles */
 .products-header {
@@ -1067,7 +1067,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     .search-filters {
         flex-direction: column;
     }
@@ -1160,7 +1160,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     .welcome-section {
         padding: 2rem 1rem;
     }
@@ -1342,7 +1342,7 @@ select.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     .dashboard-container {
         flex-direction: column;
     }
